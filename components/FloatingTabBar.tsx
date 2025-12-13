@@ -56,7 +56,7 @@ export function FloatingTabBar({ state, descriptors, navigation }: BottomTabBarP
               accessibilityLabel={options.tabBarAccessibilityLabel}
               onPress={onPress}
               onLongPress={onLongPress}
-              className={`flex-1 items-center justify-center rounded-full px-6 py-2.5 ${
+              className={`flex-1 items-center justify-center rounded-full px-6 py-3.5 ${
                 isFocused ? "bg-slate-900" : "bg-transparent"
               }`}>
               <View className="flex-row items-center gap-2">

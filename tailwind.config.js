@@ -4,7 +4,12 @@ module.exports = {
 
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["SpaceGrotesk-Regular", "system-ui", "-apple-system", "sans-serif"],
+        bold: ["SpaceGrotesk-Bold", "system-ui", "-apple-system", "sans-serif"],
+      },
+    },
   },
   plugins: [],
 };

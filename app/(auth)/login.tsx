@@ -1,8 +1,9 @@
 import { AuthLayout } from "@/components/AuthLayout";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Button } from "@/components/Button";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -32,6 +33,8 @@ export default function Login() {
     console.log("Login with:", provider);
     router.replace("/(tabs)");
   };
+
+  const isDisabled = useMemo(() => isLoading || !email || !password, [email, isLoading, password])
 
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to continue" showLogo={true}>
@@ -73,36 +76,44 @@ export default function Login() {
         </View>
 
         {/* Forgot Password */}
-        <TouchableOpacity className="mb-8 self-end">
+        <Button
+          variant="link"
+          onPress={() => {}}
+          className="mb-8 self-end p-0"
+          textClass="text-sm font-semibold text-slate-900"
+        >
           <Text className="text-sm font-semibold text-slate-900">Forgot Password?</Text>
-        </TouchableOpacity>
+        </Button>
 
         {/* Login Button */}
-        <TouchableOpacity
+        <Button
           onPress={handleLogin}
-          disabled={isLoading || !email || !password}
-          className={`mb-3 rounded-xl py-4 shadow-lg ${
-            isLoading || !email || !password ? "bg-slate-400" : "bg-slate-900"
-          }`}>
+          disabled={isDisabled}
+          className={`${isDisabled ? "bg-slate-200 border border-slate-200" : "bg-slate-900"} mb-3 rounded-xl py-4 shadow-lg`}
+          textClass={isDisabled ? "text-slate-600" : "text-white"}
+        >
           <View className="flex-row items-center justify-center gap-2">
             {isLoading && (
-              <View className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <View className="h-5 w-5 animate-spin rounded-full border-2 border-white/90 border-t-transparent" />
             )}
-            <Text className="text-center text-base font-bold text-white">
+            <Text className={`${isDisabled ? "text-slate-600" : "text-white"} text-base font-bold`}>
               {isLoading ? "Signing In..." : "Sign In"}
             </Text>
           </View>
-        </TouchableOpacity>
+        </Button>
 
         {/* Quick Login Button */}
-        <TouchableOpacity
+        <Button
           onPress={handleQuickLogin}
-          className="mb-8 rounded-xl border-2 border-slate-900 bg-white py-4">
+          variant="outline"
+          className="mb-8 rounded-xl border border-slate-200 bg-white py-4 shadow-sm"
+          textClass="text-slate-900"
+        >
           <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="flash" size={18} color="#0f172a" />
-            <Text className="text-center text-base font-bold text-slate-900">Quick Login</Text>
+            <Ionicons name="flash" size={18} color="#1f2937" />
+            <Text className="text-base font-bold text-slate-900">Quick Login</Text>
           </View>
-        </TouchableOpacity>
+        </Button>
 
         {/* Divider */}
         <View className="my-6 flex-row items-center">
