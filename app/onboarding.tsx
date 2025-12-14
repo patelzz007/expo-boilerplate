@@ -41,14 +41,11 @@ export default function Onboarding() {
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
     const nextIndex = viewableItems[0]?.index;
-    if (typeof nextIndex === "number") {
-      setCurrentIndex(nextIndex);
-    }
+    
+    if (typeof nextIndex === "number") setCurrentIndex(nextIndex);
   });
 
-  const viewabilityConfig = useRef({
-    viewAreaCoveragePercentThreshold: 60,
-  });
+  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 60 });
 
   const handleNext = () => {
     if (isLast) {
@@ -62,9 +59,7 @@ export default function Onboarding() {
     });
   };
 
-  const handleSkip = () => {
-    router.replace("/(auth)/login");
-  };
+  const handleSkip = () => router.replace("/(auth)/login");
 
   const getIconColor = (key: string): string => {
     const colors: Record<string, string> = {
@@ -79,7 +74,7 @@ export default function Onboarding() {
     <View style={{ width }} className="flex-1 items-center justify-center px-8">
       <View className="mb-8 items-center justify-center">
         <View className="h-48 w-48 items-center justify-center bg-white">
-        {/* <View className="h-56 w-56 items-center justify-center rounded-3xl border border-black/10 bg-white shadow-xl"> */}
+          {/* <View className="h-56 w-56 items-center justify-center rounded-3xl border border-black/10 bg-white shadow-xl"> */}
           <Ionicons name={item.icon} size={96} color={getIconColor(item.key)} />
         </View>
       </View>
@@ -88,10 +83,9 @@ export default function Onboarding() {
       <View className="items-center px-4">
         {/* <Text className="mb-4 text-center text-3xl font-groteskBold text-black">{item.title}</Text>
         <Text className="text-center text-base font-grotesk leading-6 text-slate-600">{item.description}</Text> */}
-      
-        <Text className="mb-4 text-center text-3xl font-geistBold text-black">{item.title}</Text>
-        <Text className="text-center text-base font-geist leading-6 text-slate-600">{item.description}</Text>
-      
+
+        <Text className="font-geistBold mb-4 text-center text-3xl text-black">{item.title}</Text>
+        <Text className="font-geist text-center text-base leading-6 text-slate-600">{item.description}</Text>
       </View>
     </View>
   );
@@ -125,7 +119,7 @@ export default function Onboarding() {
 
         {/* Primary CTA */}
         <Button onPress={handleNext} className="h-14 w-full items-center justify-center rounded-2xl bg-black">
-          <Text className="text-base font-geistBold text-white">{isLast ? "Get started" : "Continue"}</Text>
+          <Text className="font-geistBold text-base text-white">{isLast ? "Get started" : "Continue"}</Text>
         </Button>
 
         {/* Secondary CTA */}
