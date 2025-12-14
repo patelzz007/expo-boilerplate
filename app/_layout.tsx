@@ -1,20 +1,63 @@
 import "../global.css";
 
 import { Stack } from "expo-router";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
+import { AppState, ActivityIndicator, View, Text as RNText, AppStateStatus } from "react-native";
+import { useEffect, useState } from "react";
 import { useAppFonts } from "@/hooks/useAppFonts";
 import { AlertProvider } from "@/components/Alert";
 import { ToastProvider } from "@/components/Toast";
-import { ActivityIndicator, View, Text as RNText } from "react-native";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 8000),
+      staleTime: 30_000,
+      gcTime: 1000 * 60 * 60,
+    },
+  },
+});
 
 export default function RootLayout() {
   const fontsLoaded = useAppFonts();
+  const [persistReady, setPersistReady] = useState(false);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status: AppStateStatus) => {
+      if (status === "active") focusManager.setFocused(true);
+    });
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+      onlineManager.setOnline(Boolean(state.isConnected));
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const persister = createAsyncStoragePersister({ storage: AsyncStorage });
+    const [unsubscribe, restorePromise] = persistQueryClient({
+      queryClient,
+      persister,
+      maxAge: 1000 * 60 * 60 * 24, // 24h cache persistence
+      buster: "v1",
+    });
+
+    restorePromise.then(() => setPersistReady(true)).catch(() => setPersistReady(true));
+
+    return () => unsubscribe();
+  }, []);
 
   console.log("Fonts loaded:", fontsLoaded);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !persistReady) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" color="#0f172a" />

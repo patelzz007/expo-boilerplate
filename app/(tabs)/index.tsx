@@ -1,11 +1,24 @@
+import { Cards, type CardItem } from "@/components/Cards";
+import { Input } from "@/components/Input";
+import { Banner } from "@/components/Banner";
+import { Badge } from "@/components/Badge";
+import { Card } from "@/components/Card";
+import { EmptyState } from "@/components/EmptyState";
+import { DevPanel } from "@/components/DevPanel";
+import { ListItem } from "@/components/ListItem";
+import { Skeleton } from "@/components/Skeleton";
 import { useMenu } from "@/components/MenuContext";
 import { useApi } from "@/hooks/useApi";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Ionicons } from "@expo/vector-icons";
 import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
 import { Href, router } from "expo-router";
-import { useMemo, useState } from "react";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { useFlags } from "@/store/flags";
 
 const userSchema = z.object({
   id: z.number(),
@@ -18,27 +31,85 @@ type User = z.infer<typeof userSchema>;
 
 const BASE_URL = "https://jsonplaceholder.typicode.com/";
 
+const statsCards: CardItem[] = [
+  {
+    key: "completed",
+    title: "Completed",
+    value: 24,
+    subtitle: "Tasks finished",
+    icon: "checkmark-circle",
+    tone: "slate",
+  },
+  {
+    key: "pending",
+    title: "Pending",
+    value: 8,
+    subtitle: "Awaiting review",
+    icon: "time",
+    tone: "amber",
+  },
+];
+
 export default function Home() {
   const api = useApi(BASE_URL);
   const { openMenu } = useMenu();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [showBanner, setShowBanner] = useState(true);
+  const netInfo = useNetInfo();
+  const { debugPanel, experimentalSearch } = useFlags();
+  const { control: searchControl, watch: watchSearch } = useForm<{ search: string }>({
+    defaultValues: { search: "" },
+    mode: "onChange",
+  });
+  const search = watchSearch("search");
+  const debouncedSearch = useDebounce(search, 400);
   const canPrev = useMemo(() => page > 1, [page]);
   const canNext = useMemo(() => true, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch]);
 
   const usersProcedure = api.procedure({
     method: "GET",
     path: "users",
     responseSchema: z.array(userSchema),
-    queryKey: (options) => ["users", options?.query?._page ?? 1, options?.query?._limit ?? 5],
+    queryKey: (options) => [
+      "users",
+      options?.query?._page ?? 1,
+      options?.query?._limit ?? 5,
+      options?.query?.q ?? "",
+    ],
   });
 
   const usersQuery: UseQueryResult<{ id: number; name: string; username: string; email: string }[], Error> =
-    usersProcedure.useQuery({ query: { _page: page, _limit: limit } }, { placeholderData: keepPreviousData });
+    usersProcedure.useQuery(
+      {
+        query: {
+          _page: page,
+          _limit: limit,
+          ...(experimentalSearch || !debouncedSearch ? {} : { q: debouncedSearch }),
+        },
+      },
+      { placeholderData: keepPreviousData }
+    );
 
   const users = usersQuery.data ?? [];
+  const { refetch } = usersQuery;
   const loading = usersQuery.isPending || usersQuery.isFetching;
   const error = usersQuery.error?.message ?? null;
+  const isOffline = netInfo.isConnected === false;
+  const displayedUsers = experimentalSearch && debouncedSearch
+    ? users.filter((u) => {
+        const term = debouncedSearch.toLowerCase();
+        return (
+          u.name.toLowerCase().includes(term) ||
+          u.username.toLowerCase().includes(term) ||
+          u.email.toLowerCase().includes(term)
+        );
+      })
+    : users;
 
   // console.log("Users Query:", usersQuery);
 
@@ -79,26 +150,32 @@ export default function Home() {
           </View>
         </View>
 
+        {/* Info Banner */}
+        {showBanner && (
+          <View className="mt-2 px-6 pb-4">
+            <TouchableOpacity activeOpacity={0.9} onPress={() => setShowBanner(false)}>
+              <Banner
+                tone="success"
+                title="Prototype ready"
+                message="New UI toolkit components are live on this screen. Tap to dismiss."
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {isOffline && (
+          <View className="px-6 pb-2">
+            <Banner
+              tone="warning"
+              title="Offline mode"
+              message="You are offline. Showing cached data; new requests will retry automatically when online."
+            />
+          </View>
+        )}
+
         {/* Stats Cards */}
         <View className="-mt-6 px-6">
-          <View className="overflow-hidden rounded-2xl bg-white shadow-lg">
-            <View className="flex-row">
-              <View className="flex-1 border-r border-gray-100 px-6 py-6">
-                <View className="mb-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
-                  <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
-                </View>
-                <Text className="font-geistBold text-2xl text-slate-900">24</Text>
-                <Text className="mt-1 text-xs font-medium text-slate-500">Completed</Text>
-              </View>
-              <View className="flex-1 px-6 py-6">
-                <View className="mb-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
-                  <Ionicons name="time" size={20} color="#ffffff" />
-                </View>
-                <Text className="font-geistBold text-2xl text-slate-900">8</Text>
-                <Text className="mt-1 text-xs font-medium text-slate-500">Pending</Text>
-              </View>
-            </View>
-          </View>
+          <Cards items={statsCards} columns={2} />
         </View>
 
         {/* Main CTA - View Details */}
@@ -122,9 +199,26 @@ export default function Home() {
 
         {/* Users Section (from API) */}
         <View className="px-6 pb-4">
+          <View className="mb-2">
+            <Input
+              name="search"
+              control={searchControl}
+              label="Search Users"
+              icon="search"
+              placeholder="Search by name, username, or email"
+              autoCapitalize="none"
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+          </View>
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="font-geistBold text-lg text-slate-900">Users</Text>
             <View className="flex-row items-center gap-3">
+              {experimentalSearch && (
+                <View className="rounded-full bg-emerald-100 px-3 py-1">
+                  <Text className="text-xs font-semibold text-emerald-800">Experimental search (local filter)</Text>
+                </View>
+              )}
               <TouchableOpacity
                 disabled={!canPrev || loading}
                 onPress={prevPage}
@@ -158,14 +252,31 @@ export default function Home() {
           </View>
 
           {loading && (
-            <View className="items-center py-6">
-              <ActivityIndicator />
+            <View className="gap-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <View key={i} className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
+                  <Skeleton width={40} height={40} borderRadius={20} />
+                  <View className="ml-4 flex-1 gap-2">
+                    <Skeleton width="70%" height={12} />
+                    <Skeleton width="50%" height={10} />
+                  </View>
+                  <Skeleton width={18} height={18} borderRadius={9} />
+                </View>
+              ))}
             </View>
           )}
           {error && <Text className="text-red-600">{error}</Text>}
-          {!loading && !error && (
+          {!loading && !error && displayedUsers.length === 0 && (
+            <EmptyState
+              title="No users found"
+              description="Try adjusting your search or refresh the list."
+              actionLabel="Refresh"
+              onAction={() => refetch()}
+            />
+          )}
+          {!loading && !error && displayedUsers.length > 0 && (
             <View className="gap-3">
-              {users.map((u) => (
+              {displayedUsers.map((u) => (
                 <TouchableOpacity
                   key={u.id}
                   onPress={() => router.push(`/user-details?id=${u.id}`)}
@@ -209,6 +320,30 @@ export default function Home() {
             <ActivityItem icon="people" title="Team meeting scheduled" time="5 hours ago" iconBg="bg-slate-700" />
             <ActivityItem icon="trophy" title="Milestone achieved" time="1 day ago" iconBg="bg-slate-500" />
           </View>
+        </View>
+
+        {/* UI Toolkit Demo */}
+        <View className="px-6 pb-4">
+          <Text className="mb-4 font-geistBold text-lg text-slate-900">UI Toolkit Demo</Text>
+          <Card title="Team" subtitle="Reusable ListItem, Badge, Card" icon="people" tone="blue">
+            <ListItem
+              title="Ava Dean"
+              subtitle="Product Design"
+              description="Handing off new flows"
+              badgeLabel="Online"
+              badgeTone="emerald"
+              icon="person"
+              rightElement={<Badge label="Pro" tone="amber" />}
+            />
+          </Card>
+          <Card title="Reminder" subtitle="Banner and toast-style confirmations" icon="notifications" tone="amber">
+            <Text className="text-sm text-slate-700">Banners are great for inline confirmations or warnings.</Text>
+          </Card>
+          {debugPanel && (
+            <View className="mt-4">
+              <DevPanel />
+            </View>
+          )}
         </View>
 
         {/* Quick Actions */}

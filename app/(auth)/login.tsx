@@ -2,15 +2,15 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { Button } from "@/components/Button";
-import { useForm, Controller } from "react-hook-form";
+import { Input } from "@/components/Input";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
 import { useToast } from "@/components/Toast";
 
 export default function Login() {
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -51,59 +51,26 @@ export default function Login() {
   return (
     <AuthLayout title="Welcome Back" subtitle="Sign in to continue" showLogo={true}>
       <View className="py-8">
-        {/* Email Input */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-geistSemiBold text-slate-900">Email Address</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="mail-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                </View>
-                {errors.email && <Text className="mt-1 text-xs text-red-600">{errors.email.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+        <Input
+          name="email"
+          control={control}
+          label="Email Address"
+          icon="mail-outline"
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={errors.email?.message}
+        />
 
-        {/* Password Input */}
-        <View className="mb-4">
-          <Text className="mb-2 text-sm font-geistSemiBold text-slate-900">Password</Text>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="lock-closed-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Enter your password"
-                    placeholderTextColor="#94a3b8"
-                    secureTextEntry={!showPassword}
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-                {errors.password && <Text className="mt-1 text-xs text-red-600">{errors.password.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+        <Input
+          name="password"
+          control={control}
+          label="Password"
+          icon="lock-closed-outline"
+          placeholder="Enter your password"
+          isPassword
+          error={errors.password?.message}
+        />
 
         {/* Forgot Password */}
         <Button

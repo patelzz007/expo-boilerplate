@@ -1,8 +1,9 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { AuthLayout } from "@/components/AuthLayout";
+import { Input } from "@/components/Input";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterFormData } from "@/lib/schemas";
@@ -12,8 +13,6 @@ import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicato
 import { PasswordRequirementsDisplay } from "@/components/PasswordRequirementsDisplay";
 
 export default function Register() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { showAlert } = useAlert();
   const { showToast } = useToast();
@@ -63,121 +62,58 @@ export default function Register() {
     router.replace("/(tabs)");
   };
 
+  const password = watch("password");
+
   return (
     <AuthLayout title="Get Started" subtitle="Create your account to continue" showLogo={true} showBackButton={true}>
       <View className="pb-8">
-        {/* Full Name Input */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-geistSemiBold text-slate-900">Full Name</Text>
-          <Controller
-            control={control}
-            name="fullName"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="person-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Enter your full name"
-                    placeholderTextColor="#94a3b8"
-                    autoCapitalize="words"
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                </View>
-                {errors.fullName && <Text className="mt-1 text-xs text-red-600">{errors.fullName.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+        <Input
+          name="fullName"
+          control={control}
+          label="Full Name"
+          icon="person-outline"
+          placeholder="Enter your full name"
+          autoCapitalize="words"
+          error={errors.fullName?.message}
+        />
 
-        {/* Email Input */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-geistSemiBold text-slate-900">Email Address</Text>
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="mail-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                </View>
-                {errors.email && <Text className="mt-1 text-xs text-red-600">{errors.email.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+        <Input
+          name="email"
+          control={control}
+          label="Email Address"
+          icon="mail-outline"
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          error={errors.email?.message}
+        />
 
-        {/* Password Input */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-geistSemiBold text-slate-900">Password</Text>
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="lock-closed-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Create a password"
-                    placeholderTextColor="#94a3b8"
-                    secureTextEntry={!showPassword}
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-                {errors.password && <Text className="mt-1 text-xs text-red-600">{errors.password.message}</Text>}
-                {value && (
-                  <>
-                    <PasswordStrengthIndicator password={value} />
-                    <PasswordRequirementsDisplay password={value} />
-                  </>
-                )}
-              </>
-            )}
-          />
-        </View>
+        <Input
+          name="password"
+          control={control}
+          label="Password"
+          icon="lock-closed-outline"
+          placeholder="Create a password"
+          isPassword
+          error={errors.password?.message}
+        />
 
-        {/* Confirm Password Input */}
-        <View className="mb-6">
-          <Text className="mb-2 text-sm font-semibold text-slate-900">Confirm Password</Text>
-          <Controller
-            control={control}
-            name="confirmPassword"
-            render={({ field: { onChange, value } }) => (
-              <>
-                <View className="flex-row items-center rounded-xl border border-gray-200 bg-slate-50 px-4">
-                  <Ionicons name="lock-closed-outline" size={20} color="#64748b" />
-                  <TextInput
-                    value={value}
-                    onChangeText={onChange}
-                    placeholder="Confirm your password"
-                    placeholderTextColor="#94a3b8"
-                    secureTextEntry={!showConfirmPassword}
-                    className="ml-3 flex-1 py-4 text-base text-slate-900"
-                  />
-                  <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#64748b" />
-                  </TouchableOpacity>
-                </View>
-                {errors.confirmPassword && <Text className="mt-1 text-xs text-red-600">{errors.confirmPassword.message}</Text>}
-              </>
-            )}
-          />
-        </View>
+        {password && (
+          <View className="-mt-4 mb-6">
+            <PasswordStrengthIndicator password={password} />
+            <PasswordRequirementsDisplay password={password} />
+          </View>
+        )}
+
+        <Input
+          name="confirmPassword"
+          control={control}
+          label="Confirm Password"
+          icon="lock-closed-outline"
+          placeholder="Confirm your password"
+          isPassword
+          error={errors.confirmPassword?.message}
+        />
 
         {/* Terms and Conditions */}
         <Controller

@@ -1,6 +1,20 @@
 import { SafeAreaView } from "react-native";
+import { z } from "zod";
+import React from "react";
 
-export const Container = ({ children }: { children: React.ReactNode }) => {
+const containerPropsSchema = z.object({
+  children: z.custom<React.ReactNode>(),
+});
+
+type ContainerProps = z.infer<typeof containerPropsSchema>;
+
+export const Container = (rawProps: ContainerProps) => {
+  const parsed = containerPropsSchema.safeParse(rawProps);
+  if (!parsed.success) {
+    console.warn("Container validation failed", z.treeifyError(parsed.error));
+    return null;
+  }
+  const { children } = parsed.data;
   return <SafeAreaView className={styles.container}>{children}</SafeAreaView>;
 };
 
