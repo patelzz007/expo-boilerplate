@@ -8,7 +8,7 @@ import {
   type UseMutationOptions,
   type UseMutationResult,
 } from "@tanstack/react-query";
-import { z, type ZodSchema } from "zod";
+import { z, type ZodType } from "zod";
 
 /* =========================================================
  * Types
@@ -21,6 +21,7 @@ type QueryParams = Record<string, string | number | boolean | undefined>;
 interface BaseRequestOptions {
   query?: QueryParams;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
 }
 
 export type RequestOptions<Method extends HttpMethod, Body = unknown> = Method extends "GET"
@@ -41,6 +42,31 @@ export type ApiFailure = {
 };
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
+
+type RestProcedureConfig<M extends HttpMethod, Body, Resp> = {
+  path: string;
+  method: M;
+  responseSchema?: ZodType<Resp>;
+  bodySchema?: M extends "GET" ? never : ZodType<Body>;
+  baseOptions?: BaseRequestOptions;
+  queryKey?: QueryKey | ((options?: RequestOptions<"GET">) => QueryKey);
+};
+
+type RestQueryProcedure<Resp> = {
+  queryKey: QueryKey | ((options?: RequestOptions<"GET">) => QueryKey);
+  useQuery: (
+    options?: RequestOptions<"GET">,
+    queryOptions?: Omit<UseQueryOptions<Resp, Error, Resp, QueryKey>, "queryKey" | "queryFn">,
+    overrideQueryKey?: QueryKey
+  ) => UseQueryResult<Resp, Error>;
+  fetch: (options?: RequestOptions<"GET">) => Promise<ApiResponse<Resp>>;
+  fetchOrThrow: (options?: RequestOptions<"GET">) => Promise<Resp>;
+};
+
+type RestMutationProcedure<Resp, Body> = {
+  useMutation: (mutationOptions?: UseMutationOptions<Resp, Error, Body>) => UseMutationResult<Resp, Error, Body>;
+  mutate: (body: Body) => Promise<Resp>;
+};
 
 /* =========================================================
  * Utils
@@ -67,8 +93,8 @@ async function request<T, Method extends HttpMethod, Body = unknown>(
   method: Method,
   path: string,
   options?: RequestOptions<Method, Body>,
-  responseSchema?: ZodSchema<T>,
-  bodySchema?: ZodSchema<Body>
+  responseSchema?: ZodType<T>,
+  bodySchema?: ZodType<Body>
 ): Promise<ApiResponse<T>> {
   const url = buildUrl(baseUrl, path, options?.query);
 
@@ -77,7 +103,7 @@ async function request<T, Method extends HttpMethod, Body = unknown>(
     ...options?.headers,
   };
 
-  const init: RequestInit = { method, headers };
+  const init: RequestInit = { method, headers, signal: options?.signal };
 
   if (method !== "GET" && options && "body" in options) {
     if (bodySchema) {
@@ -111,6 +137,16 @@ async function request<T, Method extends HttpMethod, Body = unknown>(
       data,
     };
   } catch (error) {
+    // If aborted, surface a consistent shape
+    if (error instanceof DOMException && error.name === "AbortError") {
+      return {
+        ok: false,
+        status: 0,
+        data: null,
+        error: "aborted",
+      };
+    }
+
     return {
       ok: false,
       status: 0,
@@ -125,8 +161,8 @@ async function requestOrThrow<T, Method extends HttpMethod, Body = unknown>(
   method: Method,
   path: string,
   options?: RequestOptions<Method, Body>,
-  responseSchema?: ZodSchema<T>,
-  bodySchema?: ZodSchema<Body>
+  responseSchema?: ZodType<T>,
+  bodySchema?: ZodType<Body>
 ): Promise<T> {
   const res = await request<T, Method, Body>(baseUrl, method, path, options, responseSchema, bodySchema);
 
@@ -141,32 +177,35 @@ async function requestOrThrow<T, Method extends HttpMethod, Body = unknown>(
  * Public API Types
  * ========================================================= */
 
+/* Commented out: Use procedure() pattern instead for better type safety and React Query integration */
+/*
 export interface ApiClient {
-  get<T>(path: string, options?: RequestOptions<"GET">, schema?: ZodSchema<T>): Promise<ApiResponse<T>>;
+  get<T>(path: string, options?: RequestOptions<"GET">, schema?: ZodType<T>): Promise<ApiResponse<T>>;
 
   post<T, Body>(
     path: string,
     options: RequestOptions<"POST", Body>,
-    schema?: ZodSchema<T>,
-    bodySchema?: ZodSchema<Body>
+    schema?: ZodType<T>,
+    bodySchema?: ZodType<Body>
   ): Promise<ApiResponse<T>>;
 
   put<T, Body>(
     path: string,
     options: RequestOptions<"PUT", Body>,
-    schema?: ZodSchema<T>,
-    bodySchema?: ZodSchema<Body>
+    schema?: ZodType<T>,
+    bodySchema?: ZodType<Body>
   ): Promise<ApiResponse<T>>;
 
   patch<T, Body>(
     path: string,
     options: RequestOptions<"PATCH", Body>,
-    schema?: ZodSchema<T>,
-    bodySchema?: ZodSchema<Body>
+    schema?: ZodType<T>,
+    bodySchema?: ZodType<Body>
   ): Promise<ApiResponse<T>>;
 
-  delete<T>(path: string, options?: RequestOptions<"DELETE">, schema?: ZodSchema<T>): Promise<ApiResponse<T>>;
+  delete<T>(path: string, options?: RequestOptions<"DELETE">, schema?: ZodType<T>): Promise<ApiResponse<T>>;
 }
+*/
 
 export interface ApiClientRQHooks {
   useQuery<T>(
@@ -174,20 +213,24 @@ export interface ApiClientRQHooks {
     path: string,
     options?: RequestOptions<"GET">,
     queryOptions?: Omit<UseQueryOptions<T, Error, T, QueryKey>, "queryKey" | "queryFn">,
-    schema?: ZodSchema<T>
+    schema?: ZodType<T>
   ): UseQueryResult<T, Error>;
 
   useMutation<T, Body>(
     method: Exclude<HttpMethod, "GET">,
     path: string,
     baseOptions?: BaseRequestOptions,
-    schema?: ZodSchema<T>,
-    bodySchema?: ZodSchema<Body>,
+    schema?: ZodType<T>,
+    bodySchema?: ZodType<Body>,
     mutationOptions?: UseMutationOptions<T, Error, Body>
   ): UseMutationResult<T, Error, Body>;
+
+  procedure<M extends HttpMethod, Resp, Body = undefined>(
+    config: RestProcedureConfig<M, Body, Resp>
+  ): M extends "GET" ? RestQueryProcedure<Resp> : RestMutationProcedure<Resp, Body>;
 }
 
-export type UseApiReturn = ApiClient & ApiClientRQHooks;
+export type UseApiReturn = ApiClientRQHooks;
 
 /* =========================================================
  * useApi Hook (FIXED)
@@ -196,17 +239,17 @@ export type UseApiReturn = ApiClient & ApiClientRQHooks;
 export function useApi(baseUrl: string): UseApiReturn {
   return useMemo(() => {
     return {
-      /* ------------------ HTTP helpers ------------------ */
-
-      get<T>(path: string, options?: RequestOptions<"GET">, schema?: ZodSchema<T>) {
+      /* Commented out: Use procedure() pattern instead for better type safety and React Query integration */
+      /*
+      get<T>(path: string, options?: RequestOptions<"GET">, schema?: ZodType<T>) {
         return request<T, "GET">(baseUrl, "GET", path, options, schema);
       },
 
       post<T, Body>(
         path: string,
         options: RequestOptions<"POST", Body>,
-        schema?: ZodSchema<T>,
-        bodySchema?: ZodSchema<Body>
+        schema?: ZodType<T>,
+        bodySchema?: ZodType<Body>
       ) {
         return request<T, "POST", Body>(baseUrl, "POST", path, options, schema, bodySchema);
       },
@@ -214,8 +257,8 @@ export function useApi(baseUrl: string): UseApiReturn {
       put<T, Body>(
         path: string,
         options: RequestOptions<"PUT", Body>,
-        schema?: ZodSchema<T>,
-        bodySchema?: ZodSchema<Body>
+        schema?: ZodType<T>,
+        bodySchema?: ZodType<Body>
       ) {
         return request<T, "PUT", Body>(baseUrl, "PUT", path, options, schema, bodySchema);
       },
@@ -223,28 +266,29 @@ export function useApi(baseUrl: string): UseApiReturn {
       patch<T, Body>(
         path: string,
         options: RequestOptions<"PATCH", Body>,
-        schema?: ZodSchema<T>,
-        bodySchema?: ZodSchema<Body>
+        schema?: ZodType<T>,
+        bodySchema?: ZodType<Body>
       ) {
         return request<T, "PATCH", Body>(baseUrl, "PATCH", path, options, schema, bodySchema);
       },
 
-      delete<T>(path: string, options?: RequestOptions<"DELETE">, schema?: ZodSchema<T>) {
+      delete<T>(path: string, options?: RequestOptions<"DELETE">, schema?: ZodType<T>) {
         return request<T, "DELETE">(baseUrl, "DELETE", path, options, schema);
       },
+      */
 
-      /* ---------------- React Query helpers -------------- */
+      /* React Query helpers */
 
       useQuery<T>(
         queryKey: QueryKey,
         path: string,
         options?: RequestOptions<"GET">,
         queryOptions?: Omit<UseQueryOptions<T, Error, T, QueryKey>, "queryKey" | "queryFn">,
-        schema?: ZodSchema<T>
+        schema?: ZodType<T>
       ): UseQueryResult<T, Error> {
         return rqUseQuery<T, Error, T, QueryKey>({
           queryKey,
-          queryFn: () => requestOrThrow<T, "GET">(baseUrl, "GET", path, options, schema),
+          queryFn: ({ signal }) => requestOrThrow<T, "GET">(baseUrl, "GET", path, { ...options, signal }, schema),
           ...queryOptions,
         });
       },
@@ -253,8 +297,8 @@ export function useApi(baseUrl: string): UseApiReturn {
         method: Exclude<HttpMethod, "GET">,
         path: string,
         baseOptions?: BaseRequestOptions,
-        schema?: ZodSchema<T>,
-        bodySchema?: ZodSchema<Body>,
+        schema?: ZodType<T>,
+        bodySchema?: ZodType<Body>,
         mutationOptions?: UseMutationOptions<T, Error, Body>
       ): UseMutationResult<T, Error, Body> {
         return rqUseMutation<T, Error, Body>({
@@ -263,15 +307,96 @@ export function useApi(baseUrl: string): UseApiReturn {
               baseUrl,
               method,
               path,
-              {
-                ...(baseOptions ?? {}),
-                body,
-              } as RequestOptions<typeof method, Body>,
+              { ...(baseOptions ?? {}), body } as RequestOptions<typeof method, Body>,
               schema,
               bodySchema
             ),
           ...mutationOptions,
         });
+      },
+
+      procedure<M extends HttpMethod, Resp, Body = undefined>(
+        config: RestProcedureConfig<M, Body, Resp>
+      ): M extends "GET" ? RestQueryProcedure<Resp> : RestMutationProcedure<Resp, Body> {
+        const { method, path, responseSchema, bodySchema, baseOptions, queryKey } = config;
+
+        // Helper to compute the final query key
+        const computeQueryKey = (options?: RequestOptions<"GET">, override?: QueryKey): QueryKey => {
+          if (override) return override;
+
+          if (typeof queryKey === "function") return queryKey(options);
+
+          if (queryKey) return queryKey;
+
+          return [method, path];
+        };
+
+        if (method === "GET") {
+          return {
+            queryKey: queryKey ?? [method, path],
+            useQuery: (
+              options?: RequestOptions<"GET">,
+              queryOptions?: Omit<UseQueryOptions<Resp, Error, Resp, QueryKey>, "queryKey" | "queryFn">,
+              overrideQueryKey?: QueryKey
+            ) => {
+              const finalQueryKey = computeQueryKey(options, overrideQueryKey);
+
+              return rqUseQuery<Resp, Error, Resp, QueryKey>({
+                queryKey: finalQueryKey,
+                queryFn: ({ signal }) =>
+                  requestOrThrow<Resp, "GET">(
+                    baseUrl,
+                    "GET",
+                    path,
+                    { ...(baseOptions ?? {}), ...(options ?? {}), signal },
+                    responseSchema as ZodType<Resp>
+                  ),
+                ...queryOptions,
+              });
+            },
+            fetch: (options?: RequestOptions<"GET">) =>
+              request<Resp, "GET">(
+                baseUrl,
+                "GET",
+                path,
+                { ...(baseOptions ?? {}), ...(options ?? {}) },
+                responseSchema as ZodType<Resp>
+              ),
+            fetchOrThrow: (options?: RequestOptions<"GET">) =>
+              requestOrThrow<Resp, "GET">(
+                baseUrl,
+                "GET",
+                path,
+                { ...(baseOptions ?? {}), ...(options ?? {}) },
+                responseSchema as ZodType<Resp>
+              ),
+          } as M extends "GET" ? RestQueryProcedure<Resp> : never;
+        }
+
+        return {
+          useMutation: (mutationOptions?: UseMutationOptions<Resp, Error, Body>) =>
+            rqUseMutation<Resp, Error, Body>({
+              mutationFn: (body: Body) =>
+                requestOrThrow<Resp, typeof method, Body>(
+                  baseUrl,
+                  method,
+                  path,
+                  { ...(baseOptions ?? {}), body } as RequestOptions<typeof method, Body>,
+                  responseSchema as ZodType<Resp>,
+                  bodySchema as ZodType<Body>
+                ),
+              ...mutationOptions,
+            }),
+          mutate: (body: Body) =>
+            requestOrThrow<Resp, typeof method, Body>(
+              baseUrl,
+              method,
+              path,
+              { ...(baseOptions ?? {}), body } as RequestOptions<typeof method, Body>,
+              responseSchema as ZodType<Resp>,
+              bodySchema as ZodType<Body>
+            ),
+        } as M extends "GET" ? never : RestMutationProcedure<Resp, Body>;
       },
     };
   }, [baseUrl]);

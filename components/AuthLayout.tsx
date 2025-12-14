@@ -23,7 +23,7 @@ export function AuthLayout({ children, title, subtitle, showBackButton = false, 
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="arrow-back" size={24} color="#0f172a" />
             </TouchableOpacity>
-            <Text className="flex-1 text-center text-xl font-bold text-slate-900">{title}</Text>
+            <Text className="flex-1 text-center text-xl font-geistBold text-slate-900">{title}</Text>
             <View className="h-10 w-10" />
           </View>
         </View>
@@ -39,13 +39,13 @@ export function AuthLayout({ children, title, subtitle, showBackButton = false, 
             <View className="h-24 w-24 items-center justify-center rounded-full bg-slate-900">
               <Ionicons name="checkmark-circle" size={48} color="#ffffff" />
             </View>
-            <Text className="mt-6 text-3xl font-bold text-slate-900">{title}</Text>
-            <Text className="mt-2 text-base text-slate-600">{subtitle}</Text>
+            <Text className="mt-6 text-3xl font-geistExtraBold text-slate-800">{title}</Text>
+            <Text className="mt-2 text-base font-geist text-slate-700">{subtitle} 123</Text>
           </View>
         ) : (
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-slate-900">{title}</Text>
-            <Text className="mt-2 text-base text-slate-600">{subtitle}</Text>
+            <Text className="text-3xl font-geistExtraBold text-slate-800">{title}</Text>
+            <Text className="mt-2 text-base font-geist text-slate-700">{subtitle}</Text>
           </View>
         )}
 

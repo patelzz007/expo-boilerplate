@@ -6,8 +6,21 @@ SplashScreen.preventAutoHideAsync();
 
 export function useAppFonts() {
   const [fontsLoaded, fontError] = useFonts({
+    "SpaceGrotesk-Light": require("@/assets/fonts/SpaceGrotesk-Light.ttf"),
     "SpaceGrotesk-Regular": require("@/assets/fonts/SpaceGrotesk-Regular.ttf"),
-    " SpaceGrotesk-Bold": require("@/assets/fonts/SpaceGrotesk-Bold.ttf"),
+    "SpaceGrotesk-Medium": require("@/assets/fonts/SpaceGrotesk-Medium.ttf"),
+    "SpaceGrotesk-SemiBold": require("@/assets/fonts/SpaceGrotesk-SemiBold.ttf"),
+    "SpaceGrotesk-Bold": require("@/assets/fonts/SpaceGrotesk-Bold.ttf"),
+
+    "Geist-Black": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-Bold": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-ExtraBold": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-ExtraLight": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-Light": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-Medium": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-Regular": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-SemiBold": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
+    "Geist-Thin": require("@/assets/fonts/Geist/static/Geist-Regular.ttf"),
   });
 
   useEffect(() => {

@@ -15,10 +15,12 @@
       [
         "expo-font",
         {
-          "fonts": [
-            "./assets/fonts/SpaceGrotesk-Regular.ttf",
-            "./assets/fonts/SpaceGrotesk-Bold.ttf"
-          ]
+          "customFonts": {
+            "GeistBold": "./assets/fonts/Geist-Bold.ttf",
+            "GeistBlack": "./assets/fonts/Geist-Black.ttf",
+            "GeistMedium": "./assets/fonts/Geist-Medium.ttf",
+            "GeistRegular": "./assets/fonts/Geist-Regular.ttf"
+          }
         }
       ]
     ],

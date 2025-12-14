@@ -1,9 +1,10 @@
 import { ScrollView, View, Text, TouchableOpacity, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { CustomHeader } from "@/components/CustomHeader";
+import { useMenu } from "@/components/MenuContext";
 
 export default function Settings() {
+  const { openMenu } = useMenu();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -11,9 +12,28 @@ export default function Settings() {
 
   return (
     <View className="flex-1 bg-white">
-      <CustomHeader title="Settings" />
-
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Hero Section */}
+        <View className="bg-slate-900 px-6 pb-10 pt-14">
+          {/* Top Bar with Menu and Notification */}
+          <View className="mb-6 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={openMenu}
+              className="h-10 w-10 items-center justify-center rounded-full active:bg-white/10"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="menu" size={28} color="#ffffff" />
+            </TouchableOpacity>
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-white/10">
+              <Ionicons name="notifications-outline" size={24} color="#ffffff" />
+            </View>
+          </View>
+
+          {/* Title Content */}
+          <View>
+            <Text className="text-3xl font-bold text-white">Settings</Text>
+            <Text className="mt-2 text-sm text-white/60">Manage your preferences and account</Text>
+          </View>
+        </View>
         {/* Profile Section */}
         <View className="border-b border-gray-100 bg-slate-50 px-6 py-6">
           <View className="flex-row items-center gap-4">

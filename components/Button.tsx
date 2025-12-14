@@ -55,7 +55,7 @@ const buttonVariants = cva(
   }
 );
 
-const buttonTextVariants = cva("text-sm font-medium", {
+const buttonTextVariants = cva("text-sm font-geistSemiBold", {
   variants: {
     variant: {
       default: "text-primary-foreground",

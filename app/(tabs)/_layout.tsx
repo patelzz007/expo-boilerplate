@@ -2,12 +2,14 @@ import { Tabs } from "expo-router";
 import { FloatingTabBar } from "@/components/FloatingTabBar";
 import { SideMenu } from "@/components/SideMenu";
 import { MenuProvider, useMenu } from "@/components/MenuContext";
+import { StatusBar } from "expo-status-bar";
 
 function TabsLayout() {
   const { menuVisible, closeMenu } = useMenu();
 
   return (
     <>
+      <StatusBar style="light" />
       <Tabs
         tabBar={(props) => <FloatingTabBar {...props} />}
         screenOptions={{

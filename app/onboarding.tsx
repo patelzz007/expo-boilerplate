@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import { FlatList, ListRenderItem, Text, useWindowDimensions, View, ViewToken } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 interface OnboardingSlide {
   key: string;
@@ -77,21 +78,27 @@ export default function Onboarding() {
   const renderItem: ListRenderItem<OnboardingSlide> = ({ item }) => (
     <View style={{ width }} className="flex-1 items-center justify-center px-8">
       <View className="mb-8 items-center justify-center">
-        <View className="h-56 w-56 items-center justify-center rounded-3xl border border-black/10 bg-white shadow-xl">
+        <View className="h-48 w-48 items-center justify-center bg-white">
+        {/* <View className="h-56 w-56 items-center justify-center rounded-3xl border border-black/10 bg-white shadow-xl"> */}
           <Ionicons name={item.icon} size={96} color={getIconColor(item.key)} />
         </View>
       </View>
 
       {/* Text */}
       <View className="items-center px-4">
-        <Text style={{ fontFamily: 'SpaceGrostek-Regular' }} className="mb-4 text-center text-3xl font-bold text-black">{item.title}</Text>
-        <Text style={{ fontFamily: 'SpaceGrostek-Regular' }} className="text-center text-base leading-6 text-slate-600">{item.description}</Text>
+        {/* <Text className="mb-4 text-center text-3xl font-groteskBold text-black">{item.title}</Text>
+        <Text className="text-center text-base font-grotesk leading-6 text-slate-600">{item.description}</Text> */}
+      
+        <Text className="mb-4 text-center text-3xl font-geistBold text-black">{item.title}</Text>
+        <Text className="text-center text-base font-geist leading-6 text-slate-600">{item.description}</Text>
+      
       </View>
     </View>
   );
 
   return (
     <View className="flex-1 bg-white">
+      <StatusBar style="dark" />
       {/* Slides */}
       <FlatList
         ref={listRef}
@@ -118,13 +125,13 @@ export default function Onboarding() {
 
         {/* Primary CTA */}
         <Button onPress={handleNext} className="h-14 w-full items-center justify-center rounded-2xl bg-black">
-          <Text className="text-base font-semibold text-white">{isLast ? "Get started" : "Continue"}</Text>
+          <Text className="text-base font-geistBold text-white">{isLast ? "Get started" : "Continue"}</Text>
         </Button>
 
         {/* Secondary CTA */}
         {!isLast && (
           <Button variant="ghost" onPress={handleSkip} className="mt-4 h-12 w-full items-center justify-center">
-            <Text className="text-sm font-medium text-slate-500">Skip for now</Text>
+            <Text className="text-md font-groteskBold text-slate-600">Skip for now</Text>
           </Button>
         )}
       </View>

@@ -1,34 +1,40 @@
-import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
-
-import { CustomHeader } from "@/components/CustomHeader";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useMemo, useState } from "react";
-import { keepPreviousData } from "@tanstack/react-query";
+import { useMenu } from "@/components/MenuContext";
 import { useApi } from "@/hooks/useApi";
+import { Ionicons } from "@expo/vector-icons";
+import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
+import { Href, router } from "expo-router";
+import { useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { z } from "zod";
 
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-}
+const userSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  username: z.string(),
+  email: z.string(),
+});
+
+type User = z.infer<typeof userSchema>;
 
 const BASE_URL = "https://jsonplaceholder.typicode.com/";
 
 export default function Home() {
   const api = useApi(BASE_URL);
+  const { openMenu } = useMenu();
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
   const canPrev = useMemo(() => page > 1, [page]);
   const canNext = useMemo(() => true, []);
 
-  const usersQuery = api.useQuery<User[]>(
-    ["users", page, limit],
-    "users",
-    { query: { _page: page, _limit: limit } },
-    { placeholderData: keepPreviousData }
-  );
+  const usersProcedure = api.procedure({
+    method: "GET",
+    path: "users",
+    responseSchema: z.array(userSchema),
+    queryKey: (options) => ["users", options?.query?._page ?? 1, options?.query?._limit ?? 5],
+  });
+
+  const usersQuery: UseQueryResult<{ id: number; name: string; username: string; email: string }[], Error> =
+    usersProcedure.useQuery({ query: { _page: page, _limit: limit } }, { placeholderData: keepPreviousData });
 
   const users = usersQuery.data ?? [];
   const loading = usersQuery.isPending || usersQuery.isFetching;
@@ -50,18 +56,26 @@ export default function Home() {
   }
   return (
     <View className={styles.container}>
-      <CustomHeader title="Home" />
       <ScrollView className="flex-1" contentContainerClassName="pb-28" showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <View className="bg-slate-900 px-6 py-10">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text className="text-3xl font-bold text-white">Welcome Back</Text>
-              <Text className="mt-2 text-sm text-white/60">{"Here's what's happening today"}</Text>
-            </View>
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-white/10">
+        <View className="bg-slate-900 px-6 pb-10 pt-14">
+          {/* Top Bar with Menu and Notification */}
+          <View className="mb-6 flex-row items-center justify-between">
+            <TouchableOpacity
+              onPress={openMenu}
+              className="h-10 w-10 items-center justify-center rounded-full active:bg-white/10"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="menu" size={28} color="#ffffff" />
+            </TouchableOpacity>
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-white/10">
               <Ionicons name="notifications-outline" size={24} color="#ffffff" />
             </View>
+          </View>
+
+          {/* Welcome Content */}
+          <View>
+            <Text className="font-geistBold text-3xl text-white">Welcome Back</Text>
+            <Text className="mt-2 text-sm text-white/60">{"Here's what's happening today"}</Text>
           </View>
         </View>
 
@@ -73,14 +87,14 @@ export default function Home() {
                 <View className="mb-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
                   <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
                 </View>
-                <Text className="text-2xl font-bold text-slate-900">24</Text>
+                <Text className="font-geistBold text-2xl text-slate-900">24</Text>
                 <Text className="mt-1 text-xs font-medium text-slate-500">Completed</Text>
               </View>
               <View className="flex-1 px-6 py-6">
                 <View className="mb-3 h-10 w-10 items-center justify-center rounded-xl bg-slate-900">
                   <Ionicons name="time" size={20} color="#ffffff" />
                 </View>
-                <Text className="text-2xl font-bold text-slate-900">8</Text>
+                <Text className="font-geistBold text-2xl text-slate-900">8</Text>
                 <Text className="mt-1 text-xs font-medium text-slate-500">Pending</Text>
               </View>
             </View>
@@ -88,7 +102,7 @@ export default function Home() {
         </View>
 
         {/* Main CTA - View Details */}
-        <View className="px-6 py-8">
+          <View className="px-6 py-8">
           <TouchableOpacity
             onPress={() => router.push({ pathname: "/details", params: { name: "User" } })}
             className="overflow-hidden rounded-2xl bg-slate-900 shadow-lg">
@@ -96,7 +110,7 @@ export default function Home() {
               <View className="mb-4 h-12 w-12 items-center justify-center rounded-xl bg-white/10">
                 <Ionicons name="grid" size={24} color="#ffffff" />
               </View>
-              <Text className="text-xl font-bold text-white">View Details</Text>
+              <Text className="font-geistBold text-xl text-white">View Details</Text>
               <Text className="mt-2 text-sm text-white/70">Explore comprehensive insights and analytics</Text>
               <View className="mt-6 flex-row items-center">
                 <Text className="text-sm font-semibold text-white">Learn More</Text>
@@ -109,7 +123,7 @@ export default function Home() {
         {/* Users Section (from API) */}
         <View className="px-6 pb-4">
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-slate-900">Users</Text>
+            <Text className="font-geistBold text-lg text-slate-900">Users</Text>
             <View className="flex-row items-center gap-3">
               <TouchableOpacity
                 disabled={!canPrev || loading}
@@ -131,7 +145,7 @@ export default function Home() {
               Page {page} • Limit {limit}
             </Text>
             <View className="flex-row gap-2">
-              {[5, 10].map((l) => (
+              {[5, 10].map((l: number) => (
                 <TouchableOpacity
                   key={l}
                   disabled={loading}
@@ -152,7 +166,11 @@ export default function Home() {
           {!loading && !error && (
             <View className="gap-3">
               {users.map((u) => (
-                <View key={u.id} className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
+                <TouchableOpacity
+                  key={u.id}
+                  onPress={() => router.push(`/user-details?id=${u.id}`)}
+                  activeOpacity={0.7}
+                  className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4 active:bg-slate-100">
                   <View className={`h-10 w-10 items-center justify-center rounded-full bg-slate-900`}>
                     <Ionicons name="person" size={18} color="#ffffff" />
                   </View>
@@ -162,8 +180,17 @@ export default function Home() {
                       @{u.username} • {u.email}
                     </Text>
                   </View>
-                </View>
+                  <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+                </TouchableOpacity>
               ))}
+            </View>
+          )}
+
+          {/* JSON Response Debug */}
+          {!loading && !error && users.length > 0 && (
+            <View className="mt-8 rounded-xl bg-slate-900 px-4 py-4">
+              <Text className="mb-2 text-xs font-bold text-slate-300">API Response (JSON):</Text>
+              <Text className="font-mono text-xs text-slate-100">{JSON.stringify(users, null, 2)}</Text>
             </View>
           )}
         </View>
@@ -171,7 +198,7 @@ export default function Home() {
         {/* Activity Section */}
         <View className="px-6 pb-4">
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="text-lg font-bold text-slate-900">Recent Activity</Text>
+            <Text className="font-geistBold text-lg text-slate-900">Recent Activity</Text>
             <TouchableOpacity>
               <Text className="text-sm font-semibold text-slate-600">See All</Text>
             </TouchableOpacity>
@@ -186,7 +213,7 @@ export default function Home() {
 
         {/* Quick Actions */}
         <View className="px-6 pb-4">
-          <Text className="mb-4 text-lg font-bold text-slate-900">Quick Actions</Text>
+          <Text className="mb-4 font-geistBold text-lg text-slate-900">Quick Actions</Text>
 
           <View className="-mx-2 flex-row flex-wrap">
             <View className="w-1/2 px-2">
