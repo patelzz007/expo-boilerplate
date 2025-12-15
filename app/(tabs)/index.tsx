@@ -1,24 +1,24 @@
-import { Cards, type CardItem } from "@/components/Cards";
-import { Input } from "@/components/Input";
-import { Banner } from "@/components/Banner";
 import { Badge } from "@/components/Badge";
+import { Banner } from "@/components/Banner";
 import { Card } from "@/components/Card";
-import { EmptyState } from "@/components/EmptyState";
+import { Cards, type CardItem } from "@/components/Cards";
 import { DevPanel } from "@/components/DevPanel";
+import { EmptyState } from "@/components/EmptyState";
+import { Input } from "@/components/Input";
 import { ListItem } from "@/components/ListItem";
-import { Skeleton } from "@/components/Skeleton";
 import { useMenu } from "@/components/MenuContext";
+import { Skeleton } from "@/components/Skeleton";
 import { useApi } from "@/hooks/useApi";
 import { useDebounce } from "@/hooks/useDebounce";
-import { Ionicons } from "@expo/vector-icons";
-import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
-import { Href, router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { useNetInfo } from "@react-native-community/netinfo";
 import { useFlags } from "@/store/flags";
+import { Ionicons } from "@expo/vector-icons";
+import { useNetInfo } from "@react-native-community/netinfo";
+import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { z } from "zod";
 
 const userSchema = z.object({
   id: z.number(),
@@ -75,12 +75,7 @@ export default function Home() {
     method: "GET",
     path: "users",
     responseSchema: z.array(userSchema),
-    queryKey: (options) => [
-      "users",
-      options?.query?._page ?? 1,
-      options?.query?._limit ?? 5,
-      options?.query?.q ?? "",
-    ],
+    queryKey: (options) => ["users", options?.query?._page ?? 1, options?.query?._limit ?? 5, options?.query?.q ?? ""],
   });
 
   const usersQuery: UseQueryResult<{ id: number; name: string; username: string; email: string }[], Error> =
@@ -100,16 +95,17 @@ export default function Home() {
   const loading = usersQuery.isPending || usersQuery.isFetching;
   const error = usersQuery.error?.message ?? null;
   const isOffline = netInfo.isConnected === false;
-  const displayedUsers = experimentalSearch && debouncedSearch
-    ? users.filter((u) => {
-        const term = debouncedSearch.toLowerCase();
-        return (
-          u.name.toLowerCase().includes(term) ||
-          u.username.toLowerCase().includes(term) ||
-          u.email.toLowerCase().includes(term)
-        );
-      })
-    : users;
+  const displayedUsers =
+    experimentalSearch && debouncedSearch
+      ? users.filter((u: User) => {
+          const term = debouncedSearch.toLowerCase();
+          return (
+            u.name.toLowerCase().includes(term) ||
+            u.username.toLowerCase().includes(term) ||
+            u.email.toLowerCase().includes(term)
+          );
+        })
+      : users;
 
   // console.log("Users Query:", usersQuery);
 
@@ -179,7 +175,7 @@ export default function Home() {
         </View>
 
         {/* Main CTA - View Details */}
-          <View className="px-6 py-8">
+        <View className="px-6 py-8">
           <TouchableOpacity
             onPress={() => router.push({ pathname: "/details", params: { name: "User" } })}
             className="overflow-hidden rounded-2xl bg-slate-900 shadow-lg">
@@ -257,8 +253,8 @@ export default function Home() {
                 <View key={i} className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
                   <Skeleton width={40} height={40} borderRadius={20} />
                   <View className="ml-4 flex-1 gap-2">
-                    <Skeleton width="70%" height={12} />
-                    <Skeleton width="50%" height={10} />
+                    <Skeleton width="70%" height={12} borderRadius={6} />
+                    <Skeleton width="50%" height={10} borderRadius={5} />
                   </View>
                   <Skeleton width={18} height={18} borderRadius={9} />
                 </View>
@@ -272,6 +268,7 @@ export default function Home() {
               description="Try adjusting your search or refresh the list."
               actionLabel="Refresh"
               onAction={() => refetch()}
+              icon="people-outline"
             />
           )}
           {!loading && !error && displayedUsers.length > 0 && (
@@ -333,7 +330,7 @@ export default function Home() {
               badgeLabel="Online"
               badgeTone="emerald"
               icon="person"
-              rightElement={<Badge label="Pro" tone="amber" />}
+              rightElement={<Badge label="Pro" tone="amber" pill={true} />}
             />
           </Card>
           <Card title="Reminder" subtitle="Banner and toast-style confirmations" icon="notifications" tone="amber">
