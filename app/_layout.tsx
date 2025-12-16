@@ -33,6 +33,7 @@ export default function RootLayout() {
     const subscription = AppState.addEventListener("change", (status: AppStateStatus) => {
       if (status === "active") focusManager.setFocused(true);
     });
+
     return () => subscription.remove();
   }, []);
 
@@ -40,6 +41,7 @@ export default function RootLayout() {
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       onlineManager.setOnline(Boolean(state.isConnected));
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -61,7 +63,7 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !persistReady) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ backgroundColor: '#f8fafc' }}>
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: "#f8fafc" }}>
         <ActivityIndicator size="large" color="#1e293b" />
       </View>
     );
