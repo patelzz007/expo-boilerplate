@@ -81,7 +81,7 @@ export default function Login() {
           onPress={() => {}}
           className="mb-8 self-end p-0"
           textClass="text-sm font-semibold">
-          <Text className="text-sm font-semibold" style={{ color: tokens.text }}>Forgot Password?</Text>
+          <Text className="text-xs font-groteskMedium" style={{ color: tokens.text }}>Forgot Password?</Text>
         </Button>
 
         {/* Login Button */}
@@ -94,7 +94,7 @@ export default function Login() {
             {isLoading && (
               <View className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: tokens.primaryTextOn }} />
             )}
-            <Text className="text-center text-base font-bold" style={{ color: !isValid || isLoading ? tokens.textMuted : tokens.primaryTextOn }}>
+            <Text className="text-center text-sm font-groteskMedium" style={{ color: !isValid || isLoading ? tokens.textMuted : tokens.primaryTextOn }}>
               {isLoading ? "Signing In..." : "Sign In"}
             </Text>
           </View>
@@ -106,13 +106,13 @@ export default function Login() {
           className="mb-8 flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
           style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
           <Ionicons name="flash" size={18} color={tokens.accent as any} />
-          <Text className="text-base font-semibold" style={{ color: tokens.text }}>Quick Login</Text>
+          <Text className="text-sm font-groteskMedium" style={{ color: tokens.text }}>Quick Login</Text>
         </TouchableOpacity>
 
         {/* Divider */}
         <View className="my-6 flex-row items-center">
           <View className="h-px flex-1" style={{ backgroundColor: tokens.border }} />
-          <Text className="px-4 text-sm" style={{ color: tokens.textMuted }}>or continue with</Text>
+          <Text className="px-4 text-xs font-geistMedium" style={{ color: tokens.textMuted }}>or continue with</Text>
           <View className="h-px flex-1" style={{ backgroundColor: tokens.border }} />
         </View>
 
@@ -123,30 +123,30 @@ export default function Login() {
             className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
             style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
             <Ionicons name="logo-google" size={22} color={tokens.text as any} />
-            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Google</Text>
+            <Text className="text-sm font-groteskMedium" style={{ color: tokens.text }}>Continue with Google</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSocialLogin("Apple")}
             className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
             style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
             <Ionicons name="logo-apple" size={22} color={tokens.text as any} />
-            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Apple</Text>
+            <Text className="text-sm font-groteskMedium" style={{ color: tokens.text }}>Continue with Apple</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSocialLogin("Facebook")}
             className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
             style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
             <Ionicons name="logo-facebook" size={22} color={tokens.text as any} />
-            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Facebook</Text>
+            <Text className="text-sm font-groteskMedium" style={{ color: tokens.text }}>Continue with Facebook</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Sign Up Link */}
       <View className="flex-row items-center justify-center pt-4">
-        <Text className="text-sm" style={{ color: tokens.textMuted }}>{"Don't have an account? "}</Text>
+        <Text className="text-xs font-groteskMedium" style={{ color: tokens.textMuted }}>{"Don't have an account? "}</Text>
         <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-          <Text className="font-bold text-sm" style={{ color: tokens.text }}>Sign Up</Text>
+          <Text className="font-groteskMedium text-xs" style={{ color: tokens.text }}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </AuthLayout>

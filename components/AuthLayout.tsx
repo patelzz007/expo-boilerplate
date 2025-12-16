@@ -52,7 +52,7 @@ export function AuthLayout(rawProps: AuthLayoutProps) {
               <Ionicons name="checkmark-circle" size={48} color={tokens.primaryTextOn as any} />
             </View>
             <Text className="mt-6 text-3xl font-geistExtraBold" style={{ color: tokens.text }}>{title}</Text>
-            <Text className="mt-2 text-base font-geist" style={{ color: tokens.textMuted }}>{subtitle} 123</Text>
+            <Text className="mt-2 text-base font-geist" style={{ color: tokens.textMuted }}>{subtitle}</Text>
           </View>
         ) : (
           <View className="mb-8">
