@@ -12,24 +12,38 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { z, treeifyError } from "zod";
 import { useTheme } from "./ThemeProvider";
 
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const MENU_WIDTH = SCREEN_WIDTH * 0.75;
 
-interface MenuItem {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  route?: string;
-  onPress?: () => void;
-}
+const menuItemSchema = z.object({
+  label: z.string().trim().min(1, "Menu label is required"),
+  icon: z.custom<keyof typeof Ionicons.glyphMap>(
+    (name) => typeof name === "string" && Object.prototype.hasOwnProperty.call(Ionicons.glyphMap, name),
+    "Invalid Ionicon name"
+  ),
+  route: z.string().optional(),
+  onPress: z.custom<() => void>().optional(),
+});
 
-interface SideMenuProps {
-  visible: boolean;
-  onClose: () => void;
-}
+type MenuItem = z.infer<typeof menuItemSchema>;
 
-export function SideMenu({ visible, onClose }: SideMenuProps) {
+const sideMenuPropsSchema = z.object({
+  visible: z.boolean(),
+  onClose: z.custom<() => void>(),
+});
+
+type SideMenuProps = z.infer<typeof sideMenuPropsSchema>;
+
+export function SideMenu(rawProps: SideMenuProps) {
+  const parsed = sideMenuPropsSchema.safeParse(rawProps);
+  if (!parsed.success) {
+    console.warn("SideMenu validation failed", z.treeifyError(parsed.error));
+    return null;
+  }
+  const { visible, onClose } = parsed.data;
   const { tokens } = useTheme();
   const slideAnim = React.useRef(new Animated.Value(-MENU_WIDTH)).current;
   const opacityAnim = React.useRef(new Animated.Value(0)).current;

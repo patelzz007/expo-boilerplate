@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Pressable, type PressableProps, Platform } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
+import { z, treeifyError } from "zod";
 import { cn } from "./utils/cn";
 import { TextClassContext } from "./utils/text-context";
 
@@ -28,6 +29,18 @@ import { TextClassContext } from "./utils/text-context";
  * </Button>
  * ```
  */
+
+const buttonPropsSchema = z.object({
+  variant: z.enum(["default", "destructive", "outline", "secondary", "ghost", "link"]).default("default"),
+  size: z.enum(["default", "sm", "lg", "icon"]).default("default"),
+  disabled: z.boolean().optional(),
+  children: z.custom<React.ReactNode>().optional(),
+  onPress: z.custom<(event: any) => void>().optional(),
+  textClass: z.string().optional(),
+  className: z.string().optional(),
+});
+
+type ButtonProps = z.infer<typeof buttonPropsSchema> & Omit<PressableProps, keyof z.infer<typeof buttonPropsSchema>>;
 
 const buttonVariants = cva(
   "group flex items-center justify-center rounded-md",
@@ -78,17 +91,19 @@ const buttonTextVariants = cva("text-sm font-geistSemiBold", {
   },
 });
 
-interface ButtonProps extends PressableProps, VariantProps<typeof buttonVariants> {
-  textClass?: string;
-}
-
 const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(
-  ({ className, textClass, variant, size, ...props }, ref) => {
+  (rawProps, ref) => {
+    const parsed = buttonPropsSchema.safeParse(rawProps);
+    if (!parsed.success) {
+      console.warn("Button validation failed", treeifyError(parsed.error));
+      return null;
+    }
+    const { className, textClass, variant = "default", size = "default", disabled, ...props } = parsed.data;
     // Platform-specific feedback
     const androidRipple = Platform.select({
       android: {
         android_ripple: {
-          color: variant === "destructive" ? "rgba(239, 68, 68, 0.3)" : "rgba(99, 102, 241, 0.3)",
+          color: variant! === "destructive" ? "rgba(239, 68, 68, 0.3)" : "rgba(99, 102, 241, 0.3)",
           borderless: false,
         },
       },
@@ -96,11 +111,11 @@ const Button = React.forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>
     });
 
     return (
-      <TextClassContext.Provider value={cn(buttonTextVariants({ variant, size }), textClass)}>
+      <TextClassContext.Provider value={cn(buttonTextVariants({ variant: variant!, size: size! }), textClass)}>
         <Pressable
           className={cn(
-            props.disabled && "opacity-50 web:pointer-events-none",
-            buttonVariants({ variant, size, className })
+            disabled && "opacity-50 web:pointer-events-none",
+            buttonVariants({ variant: variant!, size: size!, className })
           )}
           ref={ref}
           role="button"

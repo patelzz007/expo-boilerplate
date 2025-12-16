@@ -2,17 +2,26 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
+import { z, treeifyError } from "zod";
 import { useTheme } from "./ThemeProvider";
 
-interface AuthLayoutProps {
-  children: ReactNode;
-  title: string;
-  subtitle: string;
-  showBackButton?: boolean;
-  showLogo?: boolean;
-}
+const authLayoutPropsSchema = z.object({
+  children: z.custom<ReactNode>(),
+  title: z.string().trim().min(1, "Title is required"),
+  subtitle: z.string().trim().min(1, "Subtitle is required"),
+  showBackButton: z.boolean().default(false),
+  showLogo: z.boolean().default(true),
+});
 
-export function AuthLayout({ children, title, subtitle, showBackButton = false, showLogo = true }: AuthLayoutProps) {
+type AuthLayoutProps = z.infer<typeof authLayoutPropsSchema>;
+
+export function AuthLayout(rawProps: AuthLayoutProps) {
+  const parsed = authLayoutPropsSchema.safeParse(rawProps);
+  if (!parsed.success) {
+    console.warn("AuthLayout validation failed", z.treeifyError(parsed.error));
+    return null;
+  }
+  const { children, title, subtitle, showBackButton, showLogo } = parsed.data;
   const { tokens } = useTheme();
   
   return (

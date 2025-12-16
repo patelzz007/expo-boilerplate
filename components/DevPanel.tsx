@@ -1,14 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { ScrollView, Switch, Text, View } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { z, treeifyError } from "zod";
 import { useFlags } from "@/store/flags";
 
-interface DevPanelProps {
-  title?: string;
-  showFlags?: boolean;
-}
+const devPanelPropsSchema = z.object({
+  title: z.string().default("Dev / Debug Panel"),
+  showFlags: z.boolean().default(true),
+});
 
-export function DevPanel({ title = "Dev / Debug Panel", showFlags = true }: DevPanelProps) {
+type DevPanelProps = z.infer<typeof devPanelPropsSchema>;
+
+export function DevPanel(rawProps: DevPanelProps = {}) {
+  const parsed = devPanelPropsSchema.safeParse(rawProps);
+  if (!parsed.success) {
+    console.warn("DevPanel validation failed", z.treeifyError(parsed.error));
+    return null;
+  }
+  const { title, showFlags } = parsed.data;
   const queryClient = useQueryClient();
   const [version, setVersion] = useState(0);
   const { newUI, debugPanel, experimentalSearch, toggleFlag } = useFlags();

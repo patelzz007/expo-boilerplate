@@ -1,8 +1,13 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { Text as RNText, type TextProps as RNTextProps } from "react-native";
+import { z } from "zod";
 import { cn } from "./utils/cn";
 import { TextClassContext } from "./utils/text-context";
+
+const textVariantSchema = z.enum([
+  "h1", "h2", "h3", "h4", "h5", "h6", "p", "blockquote", "code", "lead", "large", "small", "muted"
+]).optional();
 
 const textVariants = cva("text-base text-foreground font-sans", {
   variants: {

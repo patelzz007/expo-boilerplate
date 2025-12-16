@@ -366,7 +366,7 @@ export default function Home() {
           </Card>
           {debugPanel && (
             <View className="mt-4">
-              <DevPanel />
+              <DevPanel title={""} showFlags={false} />
             </View>
           )}
         </View>
