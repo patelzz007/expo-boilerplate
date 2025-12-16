@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
 import { Href, router } from "expo-router";
+import { useTheme } from "@/components/ThemeProvider";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -51,6 +52,7 @@ const statsCards: CardItem[] = [
 ];
 
 export default function Home() {
+  const { tokens, theme, setTheme, colorScheme } = useTheme();
   const api = useApi(BASE_URL);
   const { openMenu } = useMenu();
   const [page, setPage] = useState(1);
@@ -122,10 +124,10 @@ export default function Home() {
     setPage(1);
   }
   return (
-    <View className={styles.container}>
+    <View className={styles.container} style={{ backgroundColor: tokens.bg }}>
       <ScrollView className="flex-1" contentContainerClassName="pb-28" showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <View className="bg-slate-900 px-6 pb-10 pt-14">
+        <View className="px-6 pb-10 pt-14" style={{ backgroundColor: tokens.primary }}>
           {/* Top Bar with Menu and Notification */}
           <View className="mb-6 flex-row items-center justify-between">
             <TouchableOpacity
@@ -141,8 +143,10 @@ export default function Home() {
 
           {/* Welcome Content */}
           <View>
-            <Text className="font-geistBold text-3xl text-white">Welcome Back</Text>
-            <Text className="mt-2 text-sm text-white/60">{"Here's what's happening today"}</Text>
+            <Text className="font-geistBold text-3xl" style={{ color: tokens.primaryTextOn }}>Welcome Back</Text>
+            <Text className="mt-2 text-sm" style={{ color: tokens.primaryTextOn, opacity: 0.7 }}>
+              {"Here's what's happening today"}
+            </Text>
           </View>
         </View>
 
@@ -178,16 +182,19 @@ export default function Home() {
         <View className="px-6 py-8">
           <TouchableOpacity
             onPress={() => router.push({ pathname: "/details", params: { name: "User" } })}
-            className="overflow-hidden rounded-2xl bg-slate-900 shadow-lg">
+            className="overflow-hidden rounded-2xl shadow-lg"
+            style={{ backgroundColor: tokens.surface }}>
             <View className="px-6 py-8">
               <View className="mb-4 h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                <Ionicons name="grid" size={24} color="#ffffff" />
+                <Ionicons name="grid" size={24} color={colorScheme === "dark" ? tokens.accent : tokens.primary} />
               </View>
-              <Text className="font-geistBold text-xl text-white">View Details</Text>
-              <Text className="mt-2 text-sm text-white/70">Explore comprehensive insights and analytics</Text>
+              <Text className="font-geistBold text-xl" style={{ color: tokens.text }}>View Details</Text>
+              <Text className="mt-2 text-sm" style={{ color: tokens.textMuted }}>
+                Explore comprehensive insights and analytics
+              </Text>
               <View className="mt-6 flex-row items-center">
-                <Text className="text-sm font-semibold text-white">Learn More</Text>
-                <Ionicons name="arrow-forward" size={16} color="#ffffff" className="ml-2" />
+                <Text className="text-sm font-semibold" style={{ color: tokens.accent }}>Learn More</Text>
+                <Ionicons name="arrow-forward" size={16} color={tokens.accent} className="ml-2" />
               </View>
             </View>
           </TouchableOpacity>
@@ -303,6 +310,22 @@ export default function Home() {
           )}
         </View>
 
+        {/* Theme Switcher */}
+        <View className="px-6 pb-4">
+          <View className="mb-2 flex-row items-center justify-between">
+            <Text className="font-geistBold text-lg" style={{ color: tokens.text }}>Theme</Text>
+            <View className="flex-row gap-2">
+              {["light", "dark", "system"].map((opt) => (
+                <TouchableOpacity
+                  key={opt}
+                  onPress={() => setTheme(opt as any)}
+                  className={`rounded-lg px-3 py-2`} style={{ backgroundColor: theme === opt ? tokens.primary : tokens.border }}>
+                  <Text style={{ color: theme === opt ? tokens.primaryTextOn : tokens.text }}>{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
         {/* Activity Section */}
         <View className="px-6 pb-4">
           <View className="mb-4 flex-row items-center justify-between">
@@ -321,7 +344,7 @@ export default function Home() {
 
         {/* UI Toolkit Demo */}
         <View className="px-6 pb-4">
-          <Text className="mb-4 font-geistBold text-lg text-slate-900">UI Toolkit Demo</Text>
+          <Text className="mb-4 font-geistBold text-lg" style={{ color: tokens.text }}>UI Toolkit Demo</Text>
           <Card title="Team" subtitle="Reusable ListItem, Badge, Card" icon="people" tone="blue">
             <ListItem
               title="Ava Dean"
@@ -334,7 +357,7 @@ export default function Home() {
             />
           </Card>
           <Card title="Reminder" subtitle="Banner and toast-style confirmations" icon="notifications" tone="amber">
-            <Text className="text-sm text-slate-700">Banners are great for inline confirmations or warnings.</Text>
+            <Text className="text-sm" style={{ color: tokens.textMuted }}>Banners are great for inline confirmations or warnings.</Text>
           </Card>
           {debugPanel && (
             <View className="mt-4">
@@ -345,19 +368,19 @@ export default function Home() {
 
         {/* Quick Actions */}
         <View className="px-6 pb-4">
-          <Text className="mb-4 font-geistBold text-lg text-slate-900">Quick Actions</Text>
+          <Text className="mb-4 font-geistBold text-lg" style={{ color: tokens.text }}>Quick Actions</Text>
 
           <View className="-mx-2 flex-row flex-wrap">
-            <View className="w-1/2 px-2">
+            <View className="mb-4 w-1/2 px-2">
               <ActionCard icon="person" label="Profile" />
             </View>
-            <View className="w-1/2 px-2">
+            <View className="mb-4 w-1/2 px-2">
               <ActionCard icon="settings" label="Settings" />
             </View>
-            <View className="w-1/2 px-2">
+            <View className="mb-4 w-1/2 px-2">
               <ActionCard icon="notifications" label="Alerts" />
             </View>
-            <View className="w-1/2 px-2">
+            <View className="mb-4 w-1/2 px-2">
               <ActionCard icon="help-circle" label="Help" />
             </View>
           </View>
@@ -395,12 +418,21 @@ interface ActionCardProps {
 }
 
 function ActionCard({ icon, label }: ActionCardProps) {
+  const { tokens } = useTheme();
   return (
-    <TouchableOpacity className="items-center rounded-xl border border-gray-200 bg-white px-4 py-6 shadow-sm">
-      <View className="mb-3 h-12 w-12 items-center justify-center rounded-xl bg-slate-900">
-        <Ionicons name={icon} size={22} color="#ffffff" />
+    <TouchableOpacity 
+      className="items-center rounded-xl px-4 py-6"
+      style={{ 
+        backgroundColor: tokens.surface, 
+        borderWidth: 1, 
+        borderColor: tokens.border 
+      }}>
+      <View 
+        className="mb-3 h-12 w-12 items-center justify-center rounded-xl"
+        style={{ backgroundColor: tokens.primary }}>
+        <Ionicons name={icon} size={22} color={tokens.primaryTextOn} />
       </View>
-      <Text className="text-sm font-semibold text-slate-900">{label}</Text>
+      <Text className="text-sm font-semibold" style={{ color: tokens.text }}>{label}</Text>
     </TouchableOpacity>
   );
 }

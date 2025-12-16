@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, StyleProp, ViewStyle } from "react-native";
-import { z } from "zod";
+import { z, treeifyError } from "zod";
+import { useTheme } from "./ThemeProvider";
 
 const skeletonPropsSchema = z.object({
   width: z.union([z.number().positive(), z.string()]),
@@ -14,11 +15,12 @@ type SkeletonProps = z.infer<typeof skeletonPropsSchema>;
 export function Skeleton(rawProps: SkeletonProps) {
   const parsed = skeletonPropsSchema.safeParse(rawProps);
   if (!parsed.success) {
-    console.warn("Skeleton validation failed", z.treeifyError(parsed.error));
+    console.warn("Skeleton validation failed", treeifyError(parsed.error));
     return null;
   }
   const { width, height, borderRadius, style } = parsed.data;
   const opacity = useRef(new Animated.Value(0.6)).current;
+  const { tokens } = useTheme();
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -39,7 +41,7 @@ export function Skeleton(rawProps: SkeletonProps) {
           height,
           borderRadius,
           opacity,
-          backgroundColor: "#e2e8f0",
+          backgroundColor: tokens.border,
         },
         style,
       ]}

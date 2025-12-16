@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
+import { useTheme } from "./ThemeProvider";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -12,18 +13,20 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ children, title, subtitle, showBackButton = false, showLogo = true }: AuthLayoutProps) {
+  const { tokens } = useTheme();
+  
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1" style={{ backgroundColor: tokens.bg }}>
       {showBackButton && (
-        <View className="bg-white px-4 pb-3 pt-14 shadow-sm">
+        <View className="px-4 pb-3 pt-14 shadow-sm" style={{ backgroundColor: tokens.surface }}>
           <View className="flex-row items-center">
             <TouchableOpacity
               onPress={() => router.back()}
-              className="h-10 w-10 items-center justify-center rounded-full active:bg-gray-100"
+              className="h-10 w-10 items-center justify-center rounded-full active:opacity-70"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="arrow-back" size={24} color="#0f172a" />
+              <Ionicons name="arrow-back" size={24} color={tokens.text as any} />
             </TouchableOpacity>
-            <Text className="flex-1 text-center text-xl font-geistBold text-slate-900">{title}</Text>
+            <Text className="flex-1 text-center text-xl font-geistBold" style={{ color: tokens.text }}>{title}</Text>
             <View className="h-10 w-10" />
           </View>
         </View>
@@ -36,16 +39,16 @@ export function AuthLayout({ children, title, subtitle, showBackButton = false, 
         {/* Logo/Header Section */}
         {showLogo ? (
           <View className="items-center py-12">
-            <View className="h-24 w-24 items-center justify-center rounded-full bg-slate-900">
-              <Ionicons name="checkmark-circle" size={48} color="#ffffff" />
+            <View className="h-24 w-24 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+              <Ionicons name="checkmark-circle" size={48} color={tokens.primaryTextOn as any} />
             </View>
-            <Text className="mt-6 text-3xl font-geistExtraBold text-slate-800">{title}</Text>
-            <Text className="mt-2 text-base font-geist text-slate-700">{subtitle} 123</Text>
+            <Text className="mt-6 text-3xl font-geistExtraBold" style={{ color: tokens.text }}>{title}</Text>
+            <Text className="mt-2 text-base font-geist" style={{ color: tokens.textMuted }}>{subtitle} 123</Text>
           </View>
         ) : (
           <View className="mb-8">
-            <Text className="text-3xl font-geistExtraBold text-slate-800">{title}</Text>
-            <Text className="mt-2 text-base font-geist text-slate-700">{subtitle}</Text>
+            <Text className="text-3xl font-geistExtraBold" style={{ color: tokens.text }}>{title}</Text>
+            <Text className="mt-2 text-base font-geist" style={{ color: tokens.textMuted }}>{subtitle}</Text>
           </View>
         )}
 

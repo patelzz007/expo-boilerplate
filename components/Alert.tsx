@@ -2,10 +2,11 @@ import React, { createContext, useCallback, useContext, useState } from "react";
 import { Modal, Pressable } from "react-native";
 import Animated, { FadeIn, FadeOut, ZoomIn, ZoomOut } from "react-native-reanimated";
 import { AlertTriangle, Check, Info, X } from "lucide-react-native";
-import { z } from "zod";
+import { z, treeifyError } from "zod";
 import { Text } from "./Text";
 import { cn } from "./utils/cn";
 import { View } from "./View";
+import { useTheme } from "./ThemeProvider";
 
 // --------------------
 // Types (with Zod validation)
@@ -47,7 +48,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   const showAlert = useCallback((options: AlertOptionsInput) => {
     const parsed = alertOptionsSchema.safeParse(options);
     if (!parsed.success) {
-      console.warn("Alert validation failed", z.treeifyError(parsed.error));
+      console.warn("Alert validation failed", treeifyError(parsed.error));
       return;
     }
 
@@ -110,6 +111,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const { tokens } = useTheme();
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
       {children}
@@ -121,7 +123,7 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
           <Pressable className="absolute inset-0" onPress={hideAlert} />
 
           <Animated.View entering={ZoomIn.duration(300)} exiting={ZoomOut.duration(200)} className="w-full max-w-sm">
-            <View className="overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <View className="overflow-hidden rounded-2xl shadow-2xl" style={{ backgroundColor: tokens.surface }}>
               {/* Content */}
               <View className="items-center px-8 py-10">
                 {/* Icon */}
@@ -137,11 +139,13 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                 </View>
 
                 {/* Title */}
-                <Text className="mb-3 text-center font-bold text-2xl text-slate-900">{alertOptions?.title}</Text>
+                <Text className="mb-3 text-center font-bold text-2xl" style={{ color: tokens.text }}>
+                  {alertOptions?.title}
+                </Text>
 
                 {/* Message */}
                 {alertOptions?.message && (
-                  <Text className="mb-6 px-2 text-center text-base leading-6 text-slate-600">
+                  <Text className="mb-6 px-2 text-center text-base leading-6" style={{ color: tokens.textMuted }}>
                     {alertOptions.message}
                   </Text>
                 )}
@@ -152,14 +156,20 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
                     <Pressable
                       key={index}
                       onPress={() => handleButtonPress(button)}
-                      className="items-center justify-center rounded-xl bg-slate-900 px-6 py-3">
-                      <Text className="text-center text-base font-semibold text-white">{button.text}</Text>
+                      className="items-center justify-center rounded-xl px-6 py-3"
+                      style={{ backgroundColor: tokens.primary }}>
+                      <Text className="text-center text-base font-semibold" style={{ color: tokens.primaryTextOn }}>
+                        {button.text}
+                      </Text>
                     </Pressable>
                   )) || (
                     <Pressable
                       onPress={hideAlert}
-                      className="items-center justify-center rounded-xl bg-slate-900 px-6 py-3">
-                      <Text className="text-center text-base font-semibold text-white">OK</Text>
+                      className="items-center justify-center rounded-xl px-6 py-3"
+                      style={{ backgroundColor: tokens.primary }}>
+                      <Text className="text-center text-base font-semibold" style={{ color: tokens.primaryTextOn }}>
+                        OK
+                      </Text>
                     </Pressable>
                   )}
                 </View>

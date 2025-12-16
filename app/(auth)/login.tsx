@@ -9,10 +9,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginFormData } from "@/lib/schemas";
 import { useToast } from "@/components/Toast";
+import { useTheme } from "@/components/ThemeProvider";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
+  const { tokens } = useTheme();
 
   const {
     control,
@@ -77,21 +79,22 @@ export default function Login() {
           variant="link"
           onPress={() => {}}
           className="mb-8 self-end p-0"
-          textClass="text-sm font-semibold text-slate-900">
-          <Text className="text-sm font-semibold text-slate-900">Forgot Password?</Text>
+          textClass="text-sm font-semibold">
+          <Text className="text-sm font-semibold" style={{ color: tokens.text }}>Forgot Password?</Text>
         </Button>
 
         {/* Login Button */}
         <Button
           onPress={handleSubmit(handleLogin)}
           disabled={!isValid || isLoading}
-          className={`${!isValid || isLoading ? "border border-slate-200 bg-slate-200" : "bg-slate-900"} mb-3 rounded-xl py-4 shadow-lg`}
-          textClass={!isValid || isLoading ? "text-slate-600" : "text-white"}>
+          className="mb-3 rounded-xl py-4 shadow-lg"
+          style={{ backgroundColor: !isValid || isLoading ? tokens.border : tokens.primary }}
+          textClass="font-bold text-base">
           <View className="flex-row items-center justify-center gap-2">
             {isLoading && (
-              <View className="h-5 w-5 animate-spin rounded-full border-2 border-white/90 border-t-transparent" />
+              <View className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: tokens.primaryTextOn }} />
             )}
-            <Text className={`${!isValid || isLoading ? "text-slate-600" : "text-white"} font-bold text-base`}>
+            <Text className="font-bold text-base" style={{ color: !isValid || isLoading ? tokens.textMuted : tokens.primaryTextOn }}>
               {isLoading ? "Signing In..." : "Sign In"}
             </Text>
           </View>
@@ -101,49 +104,53 @@ export default function Login() {
         <Button
           onPress={handleQuickLogin}
           variant="outline"
-          className="mb-8 rounded-xl border border-slate-200 bg-white py-4 shadow-sm"
-          textClass="text-slate-900">
+          className="mb-8 rounded-xl py-4 shadow-sm"
+          style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}
+          textClass="font-bold text-base">
           <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="flash" size={18} color="#1f2937" />
-            <Text className="font-bold text-base text-slate-900">Quick Login</Text>
+            <Ionicons name="flash" size={18} color={tokens.text as any} />
+            <Text className="font-bold text-base" style={{ color: tokens.text }}>Quick Login</Text>
           </View>
         </Button>
 
         {/* Divider */}
         <View className="my-6 flex-row items-center">
-          <View className="h-px flex-1 bg-gray-200" />
-          <Text className="px-4 text-sm text-slate-500">or continue with</Text>
-          <View className="h-px flex-1 bg-gray-200" />
+          <View className="h-px flex-1" style={{ backgroundColor: tokens.border }} />
+          <Text className="px-4 text-sm" style={{ color: tokens.textMuted }}>or continue with</Text>
+          <View className="h-px flex-1" style={{ backgroundColor: tokens.border }} />
         </View>
 
         {/* Social Login */}
         <View className="mb-4 gap-3">
           <TouchableOpacity
             onPress={() => handleSocialLogin("Google")}
-            className="flex-row items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-4 shadow-sm">
-            <Ionicons name="logo-google" size={22} color="#0f172a" />
-            <Text className="text-base font-semibold text-slate-900">Continue with Google</Text>
+            className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
+            style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
+            <Ionicons name="logo-google" size={22} color={tokens.text as any} />
+            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Google</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSocialLogin("Apple")}
-            className="flex-row items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-4 shadow-sm">
-            <Ionicons name="logo-apple" size={22} color="#0f172a" />
-            <Text className="text-base font-semibold text-slate-900">Continue with Apple</Text>
+            className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
+            style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
+            <Ionicons name="logo-apple" size={22} color={tokens.text as any} />
+            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Apple</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleSocialLogin("Facebook")}
-            className="flex-row items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white py-4 shadow-sm">
-            <Ionicons name="logo-facebook" size={22} color="#0f172a" />
-            <Text className="text-base font-semibold text-slate-900">Continue with Facebook</Text>
+            className="flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
+            style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
+            <Ionicons name="logo-facebook" size={22} color={tokens.text as any} />
+            <Text className="text-base font-semibold" style={{ color: tokens.text }}>Continue with Facebook</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Sign Up Link */}
       <View className="flex-row items-center justify-center pt-4">
-        <Text className="text-sm text-slate-600">{"Don't have an account? "}</Text>
+        <Text className="text-sm" style={{ color: tokens.textMuted }}>{"Don't have an account? "}</Text>
         <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-          <Text className="font-bold text-sm text-slate-900">Sign Up</Text>
+          <Text className="font-bold text-sm" style={{ color: tokens.text }}>Sign Up</Text>
         </TouchableOpacity>
       </View>
     </AuthLayout>

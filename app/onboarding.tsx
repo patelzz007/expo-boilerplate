@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
 import { FlatList, ListRenderItem, Text, useWindowDimensions, View, ViewToken } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface OnboardingSlide {
   key: string;
@@ -38,6 +39,7 @@ export default function Onboarding() {
   const listRef = useRef<FlatList<OnboardingSlide>>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const isLast = useMemo(() => currentIndex === SLIDES.length - 1, [currentIndex]);
+  const { tokens } = useTheme();
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
     const nextIndex = viewableItems[0]?.index;
@@ -67,32 +69,28 @@ export default function Onboarding() {
       speed: "#ef4444",
       confidence: "#10b981",
     };
-    return colors[key] || "#0f172a";
+    return colors[key] || tokens.primary;
   };
 
   const renderItem: ListRenderItem<OnboardingSlide> = ({ item }) => (
     <View style={{ width }} className="flex-1 items-center justify-center px-8">
       <View className="mb-8 items-center justify-center">
-        <View className="h-48 w-48 items-center justify-center bg-white">
-          {/* <View className="h-56 w-56 items-center justify-center rounded-3xl border border-black/10 bg-white shadow-xl"> */}
+        <View className="h-48 w-48 items-center justify-center" style={{ backgroundColor: tokens.surface }}>
           <Ionicons name={item.icon} size={96} color={getIconColor(item.key)} />
         </View>
       </View>
 
       {/* Text */}
       <View className="items-center px-4">
-        {/* <Text className="mb-4 text-center text-3xl font-groteskBold text-black">{item.title}</Text>
-        <Text className="text-center text-base font-grotesk leading-6 text-slate-600">{item.description}</Text> */}
-
-        <Text className="font-geistBold mb-4 text-center text-3xl text-black">{item.title}</Text>
-        <Text className="font-geist text-center text-base leading-6 text-slate-600">{item.description}</Text>
+        <Text className="font-geistBold mb-4 text-center text-3xl" style={{ color: tokens.text }}>{item.title}</Text>
+        <Text className="font-geist text-center text-base leading-6" style={{ color: tokens.textMuted }}>{item.description}</Text>
       </View>
     </View>
   );
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <View className="flex-1" style={{ backgroundColor: tokens.bg }}>
+      <StatusBar style="auto" />
       {/* Slides */}
       <FlatList
         ref={listRef}
@@ -113,19 +111,25 @@ export default function Onboarding() {
         <View className="mb-8 flex-row items-center justify-center gap-2">
           {SLIDES.map((_, idx) => {
             const active = idx === currentIndex;
-            return <View key={idx} className={`h-2 rounded-full ${active ? "w-6 bg-black" : "w-2 bg-slate-300"}`} />;
+            return (
+              <View
+                key={idx}
+                className={`h-2 rounded-full ${active ? "w-6" : "w-2"}`}
+                style={{ backgroundColor: active ? tokens.primary : tokens.border }}
+              />
+            );
           })}
         </View>
 
         {/* Primary CTA */}
-        <Button onPress={handleNext} className="h-14 w-full items-center justify-center rounded-2xl bg-black">
-          <Text className="font-geistBold text-base text-white">{isLast ? "Get started" : "Continue"}</Text>
+        <Button onPress={handleNext} className="h-14 w-full items-center justify-center rounded-2xl" style={{ backgroundColor: tokens.primary }}>
+          <Text className="font-geistBold text-base" style={{ color: tokens.primaryTextOn }}>{isLast ? "Get started" : "Continue"}</Text>
         </Button>
 
         {/* Secondary CTA */}
         {!isLast && (
           <Button variant="ghost" onPress={handleSkip} className="mt-4 h-12 w-full items-center justify-center">
-            <Text className="text-md font-groteskBold text-slate-600">Skip for now</Text>
+            <Text className="text-md font-groteskBold" style={{ color: tokens.textMuted }}>Skip for now</Text>
           </Button>
         )}
       </View>

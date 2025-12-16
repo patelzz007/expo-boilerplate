@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { useAppFonts } from "@/hooks/useAppFonts";
 import { AlertProvider } from "@/components/Alert";
 import { ToastProvider } from "@/components/Toast";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemedErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,17 +75,21 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AlertProvider>
-        <ToastProvider>
-          <Stack>
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="user-details" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" options={{ title: "Oops!", headerShown: false }} />
-          </Stack>
-        </ToastProvider>
-      </AlertProvider>
+      <ThemeProvider>
+        <AlertProvider>
+          <ToastProvider>
+            <ThemedErrorBoundary>
+              <Stack>
+                <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="user-details" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" options={{ title: "Oops!", headerShown: false }} />
+              </Stack>
+            </ThemedErrorBoundary>
+          </ToastProvider>
+        </AlertProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

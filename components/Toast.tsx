@@ -3,7 +3,8 @@ import { View, Pressable } from "react-native";
 import Animated, { SlideInUp, SlideOutDown } from "react-native-reanimated";
 import { Text } from "./Text";
 import { AlertCircle, CheckCircle, Info, AlertTriangle } from "lucide-react-native";
-import { z } from "zod";
+import { z, treeifyError } from "zod";
+import { useTheme } from "./ThemeProvider";
 
 const toastTypeEnum = z.enum(["success", "error", "info", "warning"]);
 
@@ -32,7 +33,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const showToast = useCallback((message: string, type?: ToastType, duration?: number) => {
     const parsed = toastInputSchema.safeParse({ message, type, duration });
     if (!parsed.success) {
-      console.warn("Toast validation failed", z.treeifyError(parsed.error));
+      console.warn("Toast validation failed", treeifyError(parsed.error));
       return;
     }
 
@@ -66,44 +67,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const getBgColor = (type: ToastType): string => {
-    switch (type) {
-      case "success":
-        return "bg-green-50";
-      case "error":
-        return "bg-red-50";
-      case "warning":
-        return "bg-amber-50";
-      default:
-        return "bg-blue-50";
-    }
-  };
-
-  const getTextColor = (type: ToastType): string => {
-    switch (type) {
-      case "success":
-        return "text-green-800";
-      case "error":
-        return "text-red-800";
-      case "warning":
-        return "text-amber-800";
-      default:
-        return "text-blue-800";
-    }
-  };
-
-  const getBorderColor = (type: ToastType): string => {
-    switch (type) {
-      case "success":
-        return "border-green-200";
-      case "error":
-        return "border-red-200";
-      case "warning":
-        return "border-amber-200";
-      default:
-        return "border-blue-200";
-    }
-  };
+  const { tokens } = useTheme();
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -117,11 +81,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             className="mb-2">
             <Pressable
               onPress={() => removeToast(toast.id)}
-              className={`flex-row items-center gap-3 rounded-lg border px-4 py-3 ${getBgColor(
-                toast.type
-              )} ${getBorderColor(toast.type)} pointer-events-auto`}>
+              className="flex-row items-center gap-3 rounded-lg border px-4 py-3 pointer-events-auto"
+              style={{ backgroundColor: tokens.surface, borderColor: tokens.border }}>
               {getIcon(toast.type)}
-              <Text className={`flex-1 text-sm font-medium ${getTextColor(toast.type)}`}>{toast.message}</Text>
+              <Text className="flex-1 text-sm font-medium" style={{ color: tokens.text }}>
+                {toast.message}
+              </Text>
             </Pressable>
           </Animated.View>
         ))}
