@@ -88,7 +88,6 @@ export function Card(rawProps: CardProps) {
   // Debug logging
   const bgColor = isDark ? toneStyle.iconBg.dark : toneStyle.iconBg.light;
   const cardBgColor = isDark ? toneStyle.cardBg.dark : toneStyle.cardBg.light;
-  console.log("Card render:", { title, tone, isDark, bgColor, cardBgColor });
 
   return (
     <Container

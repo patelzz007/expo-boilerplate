@@ -1,12 +1,10 @@
-import { ScrollView, View, Text, TouchableOpacity } from "react-native";
-
-import { useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { useMenu } from "@/components/MenuContext";
-
 import { Container } from "@/components/Container";
-import { useTheme } from "@/components/ThemeProvider";
+import { useMenu } from "@/components/MenuContext";
 import { ScreenContent } from "@/components/ScreenContent";
+import { useTheme } from "@/components/ThemeProvider";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function Details() {
   const { tokens } = useTheme();

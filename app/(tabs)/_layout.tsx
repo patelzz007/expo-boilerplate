@@ -1,7 +1,7 @@
-import { Tabs } from "expo-router";
 import { FloatingTabBar } from "@/components/FloatingTabBar";
-import { SideMenu } from "@/components/SideMenu";
 import { MenuProvider, useMenu } from "@/components/MenuContext";
+import { SideMenu } from "@/components/SideMenu";
+import { Tabs } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 
 function TabsLayout() {

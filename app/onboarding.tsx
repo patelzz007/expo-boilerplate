@@ -2,7 +2,7 @@ import { Button } from "@/components/Button";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useMemo, useRef, useState } from "react";
-import { FlatList, ListRenderItem, Text, useWindowDimensions, View, ViewToken } from "react-native";
+import { FlatList, ListRenderItem, Text, TouchableOpacity, useWindowDimensions, View, ViewToken } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/components/ThemeProvider";
 
@@ -122,9 +122,15 @@ export default function Onboarding() {
         </View>
 
         {/* Primary CTA */}
-        <Button onPress={handleNext} className="h-14 w-full items-center justify-center rounded-2xl" style={{ backgroundColor: tokens.primary }}>
-          <Text className="font-geistBold text-base" style={{ color: tokens.primaryTextOn }}>{isLast ? "Get started" : "Continue"}</Text>
-        </Button>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={handleNext}
+          className="h-14 w-full items-center justify-center rounded-2xl shadow-lg"
+          style={{ backgroundColor: tokens.primary }}>
+          <Text className="font-geistBold text-base" style={{ color: tokens.primaryTextOn }}>
+            {isLast ? "Get started" : "Continue"}
+          </Text>
+        </TouchableOpacity>
 
         {/* Secondary CTA */}
         {!isLast && (

@@ -1,3 +1,4 @@
+import { useTheme } from "@/components/ThemeProvider";
 import { useApi } from "@/hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -6,7 +7,6 @@ import { UserCircle2 } from "lucide-react-native";
 import { useEffect } from "react";
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
-import { useTheme } from "@/components/ThemeProvider";
 
 // Extended user details schema (matches JSONPlaceholder API)
 const userDetailsSchema = z.object({

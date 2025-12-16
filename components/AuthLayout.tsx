@@ -1,8 +1,8 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ReactNode } from "react";
-import { z, treeifyError } from "zod";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { treeifyError, z } from "zod";
 import { useTheme } from "./ThemeProvider";
 
 const authLayoutPropsSchema = z.object({

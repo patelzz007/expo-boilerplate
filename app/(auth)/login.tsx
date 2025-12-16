@@ -51,7 +51,7 @@ export default function Login() {
   };
 
   return (
-    <AuthLayout title="Welcome Back" subtitle="Sign in to continue" showLogo={true}>
+    <AuthLayout title="Welcome Back" subtitle="Sign in to continue" showLogo={true} showBackButton={false}>
       <View className="py-8">
         <Input
           name="email"
@@ -77,6 +77,7 @@ export default function Login() {
         {/* Forgot Password */}
         <Button
           variant="link"
+          size="default"
           onPress={() => {}}
           className="mb-8 self-end p-0"
           textClass="text-sm font-semibold">
@@ -84,34 +85,29 @@ export default function Login() {
         </Button>
 
         {/* Login Button */}
-        <Button
+        <TouchableOpacity
           onPress={handleSubmit(handleLogin)}
           disabled={!isValid || isLoading}
           className="mb-3 rounded-xl py-4 shadow-lg"
-          style={{ backgroundColor: !isValid || isLoading ? tokens.border : tokens.primary }}
-          textClass="font-bold text-base">
+          style={{ backgroundColor: !isValid || isLoading ? tokens.border : tokens.primary, opacity: !isValid || isLoading ? 0.9 : 1 }}>
           <View className="flex-row items-center justify-center gap-2">
             {isLoading && (
               <View className="h-5 w-5 animate-spin rounded-full border-2 border-t-transparent" style={{ borderColor: tokens.primaryTextOn }} />
             )}
-            <Text className="font-bold text-base" style={{ color: !isValid || isLoading ? tokens.textMuted : tokens.primaryTextOn }}>
+            <Text className="text-center text-base font-bold" style={{ color: !isValid || isLoading ? tokens.textMuted : tokens.primaryTextOn }}>
               {isLoading ? "Signing In..." : "Sign In"}
             </Text>
           </View>
-        </Button>
+        </TouchableOpacity>
 
         {/* Quick Login Button */}
-        <Button
+        <TouchableOpacity
           onPress={handleQuickLogin}
-          variant="outline"
-          className="mb-8 rounded-xl py-4 shadow-sm"
-          style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}
-          textClass="font-bold text-base">
-          <View className="flex-row items-center justify-center gap-2">
-            <Ionicons name="flash" size={18} color={tokens.text as any} />
-            <Text className="font-bold text-base" style={{ color: tokens.text }}>Quick Login</Text>
-          </View>
-        </Button>
+          className="mb-8 flex-row items-center justify-center gap-3 rounded-xl py-4 shadow-sm"
+          style={{ backgroundColor: tokens.surface, borderColor: tokens.border, borderWidth: 1 }}>
+          <Ionicons name="flash" size={18} color={tokens.accent as any} />
+          <Text className="text-base font-semibold" style={{ color: tokens.text }}>Quick Login</Text>
+        </TouchableOpacity>
 
         {/* Divider */}
         <View className="my-6 flex-row items-center">

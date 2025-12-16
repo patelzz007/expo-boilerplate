@@ -1,18 +1,18 @@
 import "../global.css";
 
-import { Stack } from "expo-router";
-import { focusManager, QueryClient, QueryClientProvider, onlineManager } from "@tanstack/react-query";
-import { persistQueryClient } from "@tanstack/react-query-persist-client";
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { AlertProvider } from "@/components/Alert";
+import { ThemedErrorBoundary } from "@/components/ErrorBoundary";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ToastProvider } from "@/components/Toast";
+import { useAppFonts } from "@/hooks/useAppFonts";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo, { NetInfoState } from "@react-native-community/netinfo";
-import { AppState, ActivityIndicator, View, Text as RNText, AppStateStatus } from "react-native";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import { focusManager, onlineManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { persistQueryClient } from "@tanstack/react-query-persist-client";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
-import { useAppFonts } from "@/hooks/useAppFonts";
-import { AlertProvider } from "@/components/Alert";
-import { ToastProvider } from "@/components/Toast";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemedErrorBoundary } from "@/components/ErrorBoundary";
+import { ActivityIndicator, AppState, AppStateStatus, Text as RNText, View } from "react-native";
 
 const queryClient = new QueryClient({
   defaultOptions: {

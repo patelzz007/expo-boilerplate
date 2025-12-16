@@ -1,8 +1,8 @@
-import { ScrollView, View, Text, TouchableOpacity, Switch } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import { useMenu } from "@/components/MenuContext";
 import { useTheme } from "@/components/ThemeProvider";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import { ScrollView, Switch, Text, TouchableOpacity, View } from "react-native";
 
 export default function Settings() {
   const { openMenu } = useMenu();

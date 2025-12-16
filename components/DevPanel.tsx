@@ -11,7 +11,7 @@ const devPanelPropsSchema = z.object({
 
 type DevPanelProps = z.infer<typeof devPanelPropsSchema>;
 
-export function DevPanel(rawProps: DevPanelProps = {}) {
+export function DevPanel(rawProps: DevPanelProps = { title: "", showFlags: false }) {
   const parsed = devPanelPropsSchema.safeParse(rawProps);
   if (!parsed.success) {
     console.warn("DevPanel validation failed", z.treeifyError(parsed.error));
