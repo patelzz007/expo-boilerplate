@@ -14,7 +14,7 @@ import { useFlags } from "@/store/flags";
 import { Ionicons } from "@expo/vector-icons";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { keepPreviousData, UseQueryResult } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -97,7 +97,7 @@ export default function Home() {
   const isOffline = netInfo.isConnected === false;
   const displayedUsers =
     experimentalSearch && debouncedSearch
-      ? users.filter((u: User) => {
+      ? users.filter((u) => {
           const term = debouncedSearch.toLowerCase();
           return (
             u.name.toLowerCase().includes(term) ||
@@ -253,8 +253,8 @@ export default function Home() {
                 <View key={i} className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
                   <Skeleton width={40} height={40} borderRadius={20} />
                   <View className="ml-4 flex-1 gap-2">
-                    <Skeleton width="70%" height={12} borderRadius={6} />
-                    <Skeleton width="50%" height={10} borderRadius={5} />
+                    <Skeleton width="70%" height={12} borderRadius={0} />
+                    <Skeleton width="50%" height={10} borderRadius={0} />
                   </View>
                   <Skeleton width={18} height={18} borderRadius={9} />
                 </View>
@@ -265,10 +265,10 @@ export default function Home() {
           {!loading && !error && displayedUsers.length === 0 && (
             <EmptyState
               title="No users found"
+              icon="people-outline"
               description="Try adjusting your search or refresh the list."
               actionLabel="Refresh"
               onAction={() => refetch()}
-              icon="people-outline"
             />
           )}
           {!loading && !error && displayedUsers.length > 0 && (
