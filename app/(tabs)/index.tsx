@@ -132,12 +132,13 @@ export default function Home() {
           <View className="mb-6 flex-row items-center justify-between">
             <TouchableOpacity
               onPress={openMenu}
-              className="h-10 w-10 items-center justify-center rounded-full active:bg-white/10"
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="menu" size={28} color="#ffffff" />
+              <Ionicons name="menu" size={28} color={tokens.primaryTextOn} />
             </TouchableOpacity>
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-white/10">
-              <Ionicons name="notifications-outline" size={24} color="#ffffff" />
+            <View className="h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+              <Ionicons name="notifications-outline" size={24} color={tokens.primaryTextOn} />
             </View>
           </View>
 
@@ -185,7 +186,7 @@ export default function Home() {
             className="overflow-hidden rounded-2xl shadow-lg"
             style={{ backgroundColor: tokens.surface }}>
             <View className="px-6 py-8">
-              <View className="mb-4 h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+              <View className="mb-4 h-12 w-12 items-center justify-center rounded-xl" style={{ backgroundColor: colorScheme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)' }}>
                 <Ionicons name="grid" size={24} color={colorScheme === "dark" ? tokens.accent : tokens.primary} />
               </View>
               <Text className="font-geistBold text-xl" style={{ color: tokens.text }}>View Details</Text>
@@ -215,30 +216,32 @@ export default function Home() {
             />
           </View>
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="font-geistBold text-lg text-slate-900">Users</Text>
+            <Text className="font-geistBold text-lg" style={{ color: tokens.text }}>Users</Text>
             <View className="flex-row items-center gap-3">
               {experimentalSearch && (
-                <View className="rounded-full bg-emerald-100 px-3 py-1">
-                  <Text className="text-xs font-semibold text-emerald-800">Experimental search (local filter)</Text>
+                <View className="rounded-full px-3 py-1" style={{ backgroundColor: colorScheme === 'dark' ? '#064e3b' : '#d1fae5' }}>
+                  <Text className="text-xs font-semibold" style={{ color: colorScheme === 'dark' ? '#6ee7b7' : '#065f46' }}>Experimental search (local filter)</Text>
                 </View>
               )}
               <TouchableOpacity
                 disabled={!canPrev || loading}
                 onPress={prevPage}
-                className="rounded-lg bg-slate-900 px-3 py-2 opacity-100">
-                <Text className="text-white">Prev</Text>
+                className="rounded-lg px-3 py-2"
+                style={{ backgroundColor: tokens.primary, opacity: (!canPrev || loading) ? 0.5 : 1 }}>
+                <Text style={{ color: tokens.primaryTextOn }}>Prev</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={!canNext || loading}
                 onPress={nextPage}
-                className="rounded-lg bg-slate-900 px-3 py-2">
-                <Text className="text-white">Next</Text>
+                className="rounded-lg px-3 py-2"
+                style={{ backgroundColor: tokens.primary, opacity: (!canNext || loading) ? 0.5 : 1 }}>
+                <Text style={{ color: tokens.primaryTextOn }}>Next</Text>
               </TouchableOpacity>
             </View>
           </View>
 
           <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-sm text-slate-600">
+            <Text className="text-sm" style={{ color: tokens.textMuted }}>
               Page {page} • Limit {limit}
             </Text>
             <View className="flex-row gap-2">
@@ -247,8 +250,9 @@ export default function Home() {
                   key={l}
                   disabled={loading}
                   onPress={() => setPageSize(l)}
-                  className={`rounded-lg px-3 py-2 ${limit === l ? "bg-slate-900" : "bg-slate-200"}`}>
-                  <Text className={limit === l ? "text-white" : "text-slate-900"}>{l}/page</Text>
+                  className="rounded-lg px-3 py-2"
+                  style={{ backgroundColor: limit === l ? tokens.primary : tokens.border }}>
+                  <Text style={{ color: limit === l ? tokens.primaryTextOn : tokens.text }}>{l}/page</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -257,7 +261,7 @@ export default function Home() {
           {loading && (
             <View className="gap-3">
               {[1, 2, 3, 4, 5].map((i) => (
-                <View key={i} className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
+                <View key={i} className="flex-row items-center rounded-xl px-4 py-4" style={{ backgroundColor: tokens.surface }}>
                   <Skeleton width={40} height={40} borderRadius={20} />
                   <View className="ml-4 flex-1 gap-2">
                     <Skeleton width="70%" height={12} borderRadius={0} />
@@ -285,17 +289,18 @@ export default function Home() {
                   key={u.id}
                   onPress={() => router.push(`/user-details?id=${u.id}`)}
                   activeOpacity={0.7}
-                  className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4 active:bg-slate-100">
-                  <View className={`h-10 w-10 items-center justify-center rounded-full bg-slate-900`}>
-                    <Ionicons name="person" size={18} color="#ffffff" />
+                  className="flex-row items-center rounded-xl px-4 py-4"
+                  style={{ backgroundColor: tokens.surface }}>
+                  <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+                    <Ionicons name="person" size={18} color={tokens.primaryTextOn} />
                   </View>
                   <View className="ml-4 flex-1">
-                    <Text className="text-sm font-semibold text-slate-900">{u.name}</Text>
-                    <Text className="mt-0.5 text-xs text-slate-500">
+                    <Text className="text-sm font-semibold" style={{ color: tokens.text }}>{u.name}</Text>
+                    <Text className="mt-0.5 text-xs" style={{ color: tokens.textMuted }}>
                       @{u.username} • {u.email}
                     </Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+                  <Ionicons name="chevron-forward" size={18} color={tokens.textMuted} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -303,9 +308,9 @@ export default function Home() {
 
           {/* JSON Response Debug */}
           {!loading && !error && users.length > 0 && (
-            <View className="mt-8 rounded-xl bg-slate-900 px-4 py-4">
-              <Text className="mb-2 text-xs font-bold text-slate-300">API Response (JSON):</Text>
-              <Text className="font-mono text-xs text-slate-100">{JSON.stringify(users, null, 2)}</Text>
+            <View className="mt-8 rounded-xl px-4 py-4" style={{ backgroundColor: colorScheme === 'dark' ? '#1e293b' : '#f1f5f9' }}>
+              <Text className="mb-2 text-xs font-bold" style={{ color: colorScheme === 'dark' ? '#cbd5e1' : '#475569' }}>API Response (JSON):</Text>
+              <Text className="font-mono text-xs" style={{ color: colorScheme === 'dark' ? '#e2e8f0' : '#1e293b' }}>{JSON.stringify(users, null, 2)}</Text>
             </View>
           )}
         </View>
@@ -329,16 +334,16 @@ export default function Home() {
         {/* Activity Section */}
         <View className="px-6 pb-4">
           <View className="mb-4 flex-row items-center justify-between">
-            <Text className="font-geistBold text-lg text-slate-900">Recent Activity</Text>
+            <Text className="font-geistBold text-lg" style={{ color: tokens.text }}>Recent Activity</Text>
             <TouchableOpacity>
-              <Text className="text-sm font-semibold text-slate-600">See All</Text>
+              <Text className="text-sm font-semibold" style={{ color: tokens.textMuted }}>See All</Text>
             </TouchableOpacity>
           </View>
 
           <View className="gap-3">
-            <ActivityItem icon="document-text" title="New report available" time="2 hours ago" iconBg="bg-slate-900" />
-            <ActivityItem icon="people" title="Team meeting scheduled" time="5 hours ago" iconBg="bg-slate-700" />
-            <ActivityItem icon="trophy" title="Milestone achieved" time="1 day ago" iconBg="bg-slate-500" />
+            <ActivityItem icon="document-text" title="New report available" time="2 hours ago" />
+            <ActivityItem icon="people" title="Team meeting scheduled" time="5 hours ago" />
+            <ActivityItem icon="trophy" title="Milestone achieved" time="1 day ago" />
           </View>
         </View>
 
@@ -394,20 +399,20 @@ interface ActivityItemProps {
   icon: keyof typeof Ionicons.glyphMap;
   title: string;
   time: string;
-  iconBg: string;
 }
 
-function ActivityItem({ icon, title, time, iconBg }: ActivityItemProps) {
+function ActivityItem({ icon, title, time }: ActivityItemProps) {
+  const { tokens } = useTheme();
   return (
-    <View className="flex-row items-center rounded-xl bg-slate-50 px-4 py-4">
-      <View className={`h-10 w-10 items-center justify-center rounded-full ${iconBg}`}>
-        <Ionicons name={icon} size={18} color="#ffffff" />
+    <View className="flex-row items-center rounded-xl px-4 py-4" style={{ backgroundColor: tokens.surface }}>
+      <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+        <Ionicons name={icon} size={18} color={tokens.primaryTextOn} />
       </View>
       <View className="ml-4 flex-1">
-        <Text className="text-sm font-semibold text-slate-900">{title}</Text>
-        <Text className="mt-0.5 text-xs text-slate-500">{time}</Text>
+        <Text className="text-sm font-semibold" style={{ color: tokens.text }}>{title}</Text>
+        <Text className="mt-0.5 text-xs" style={{ color: tokens.textMuted }}>{time}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+      <Ionicons name="chevron-forward" size={18} color={tokens.textMuted} />
     </View>
   );
 }
@@ -438,5 +443,5 @@ function ActionCard({ icon, label }: ActionCardProps) {
 }
 
 const styles = {
-  container: "flex flex-1 bg-white",
+  container: "flex flex-1",
 };

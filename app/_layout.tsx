@@ -61,8 +61,8 @@ export default function RootLayout() {
 
   if (!fontsLoaded || !persistReady) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#0f172a" />
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: '#f8fafc' }}>
+        <ActivityIndicator size="large" color="#1e293b" />
       </View>
     );
   }

@@ -14,7 +14,7 @@ export default function Details() {
   const { openMenu } = useMenu();
 
   return (
-    <View className={styles.container}>
+    <View className={styles.container} style={{ backgroundColor: tokens.bg }}>
       <ScrollView className="flex-1" contentContainerClassName="pb-28" showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View className="px-6 pb-10 pt-14" style={{ backgroundColor: tokens.primary }}>
@@ -22,11 +22,12 @@ export default function Details() {
           <View className="mb-6 flex-row items-center justify-between">
             <TouchableOpacity
               onPress={openMenu}
-              className="h-10 w-10 items-center justify-center rounded-full active:bg-white/10"
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="menu" size={28} color={tokens.primaryTextOn as any} />
             </TouchableOpacity>
-            <View className="h-12 w-12 items-center justify-center rounded-full bg-white/10">
+            <View className="h-12 w-12 items-center justify-center rounded-full" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
               <Ionicons name="notifications-outline" size={24} color={tokens.primaryTextOn as any} />
             </View>
           </View>
@@ -49,5 +50,5 @@ export default function Details() {
 }
 
 const styles = {
-  container: "flex flex-1 bg-white",
+  container: "flex flex-1",
 };

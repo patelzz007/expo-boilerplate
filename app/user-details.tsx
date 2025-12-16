@@ -67,7 +67,8 @@ export default function UserDetailsScreen() {
           <View className="flex-row items-center pt-12">
             <TouchableOpacity
               onPress={() => router.back()}
-              className="h-10 w-10 items-center justify-center rounded-full bg-white/10 active:bg-white/20"
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Ionicons name="chevron-back" size={24} color={tokens.primaryTextOn as any} />
             </TouchableOpacity>
@@ -151,12 +152,12 @@ export default function UserDetailsScreen() {
             {/* Company Information */}
             {user.company && (
               <View className="mx-6 mt-6">
-                <Text className="mb-4 font-geistBold text-lg text-slate-900">Company</Text>
+                <Text className="mb-4 font-geistBold text-lg" style={{ color: tokens.text }}>Company</Text>
 
                 <View className="rounded-xl px-4 py-4" style={{ backgroundColor: tokens.surface }}>
                   <View className="mb-3 flex-row items-center gap-3">
-                    <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-900">
-                      <Ionicons name="briefcase" size={18} color="#ffffff" />
+                    <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+                      <Ionicons name="briefcase" size={18} color={tokens.primaryTextOn} />
                     </View>
                     <View className="flex-1">
                       <Text className="text-sm font-semibold" style={{ color: tokens.text }}>{user.company.name}</Text>
@@ -179,8 +180,8 @@ export default function UserDetailsScreen() {
 
                 <View className="rounded-xl px-4 py-4" style={{ backgroundColor: tokens.surface }}>
                   <View className="mb-3 flex-row gap-3">
-                    <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-900">
-                      <Ionicons name="location" size={18} color="#ffffff" />
+                    <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+                      <Ionicons name="location" size={18} color={tokens.primaryTextOn} />
                     </View>
                     <View className="flex-1">
                       <Text className="text-sm font-semibold" style={{ color: tokens.text }}>{user.address.street}</Text>
@@ -228,18 +229,20 @@ interface InfoItemProps {
 }
 
 function InfoItem({ icon, label, value, onPress }: InfoItemProps) {
+  const { tokens } = useTheme();
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="mb-3 flex-row items-center rounded-xl bg-slate-50 px-4 py-3 active:bg-slate-100">
-      <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-900">
-        <Ionicons name={icon} size={18} color="#ffffff" />
+      className="mb-3 flex-row items-center rounded-xl px-4 py-3"
+      style={{ backgroundColor: tokens.surface }}>
+      <View className="h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: tokens.primary }}>
+        <Ionicons name={icon} size={18} color={tokens.primaryTextOn} />
       </View>
       <View className="ml-4 flex-1">
-        <Text className="text-xs font-semibold text-slate-500">{label}</Text>
-        <Text className="mt-1 text-sm font-medium text-slate-900">{value}</Text>
+        <Text className="text-xs font-semibold" style={{ color: tokens.textMuted }}>{label}</Text>
+        <Text className="mt-1 text-sm font-medium" style={{ color: tokens.text }}>{value}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color="#cbd5e1" />
+      <Ionicons name="chevron-forward" size={18} color={tokens.textMuted} />
     </TouchableOpacity>
   );
 }
