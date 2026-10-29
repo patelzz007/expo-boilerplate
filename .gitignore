@@ -14,8 +14,13 @@ expo-env.d.ts
 
 
 
+# Anchored to the app's root: a bare `ios/` would also hide the local Expo modules' own native sources
+# (modules/pdf-renderer/ios and /android, ADR 056), leaving a development build without them.
 /ios
 /android
+# Gradle's output inside a local module (its sources are committed).
+modules/*/android/build/
+modules/*/android/.gradle/
 
 # macOS
 .DS_Store
