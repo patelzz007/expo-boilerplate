@@ -4,46 +4,59 @@
     "slug": "hello-world",
     "version": "1.0.0",
     "scheme": "hello-world",
-    "platforms": ["ios", "android"],
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/favicon.png"
-    },
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "plugins": [
       "expo-router",
+      "expo-secure-store",
       [
-        "expo-font",
+        "expo-splash-screen",
         {
-          "customFonts": {
-            "GeistBold": "./assets/fonts/Geist-Bold.ttf",
-            "GeistBlack": "./assets/fonts/Geist-Black.ttf",
-            "GeistMedium": "./assets/fonts/Geist-Medium.ttf",
-            "GeistRegular": "./assets/fonts/Geist-Regular.ttf"
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 96,
+          "backgroundColor": "#24364f",
+          "resizeMode": "contain",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "imageWidth": 96,
+            "backgroundColor": "#24364f",
+            "resizeMode": "contain"
           }
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-web-browser",
+      "expo-sharing",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use the camera to scan QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": true
+        }
+      ],
+      "./config-plugins/google-code-scanner-module.ts"
     ],
     "experiments": {
       "typedRoutes": true,
       "tsconfigPaths": true
     },
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "icon": "./assets/app-icon.png",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/app-icon.png",
+        "backgroundColor": "#24364f"
       }
     }
   }

@@ -1,0 +1,17 @@
+---
+description: Project instructions — AGENTS.md and the rules/ documents it routes to
+alwaysApply: true
+---
+
+# Project rules
+
+All project instructions live in `AGENTS.md`, the shared source of truth for every AI tool. Read it first,
+then only the `rules/*.md` documents its routing table names for the task. Do not add project rules here;
+change `AGENTS.md` (and `rules/17-ai-agent-prompts.md`) instead.
+
+@AGENTS.md
+@rules/00-non-negotiables.md
+
+Before saying a task is done, run the completion gate from `AGENTS.md` after the last edit:
+`pnpm run lint`, `pnpm run typecheck`, `pnpm run test`, `pnpm exec expo install --check`. Never suppress a rule, cast, or edit
+the gate's configuration to get green.

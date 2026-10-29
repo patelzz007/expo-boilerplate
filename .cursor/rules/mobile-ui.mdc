@@ -1,0 +1,17 @@
+---
+description: Expo / React Native screens and components — styling, typography, icons, accessibility
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: false
+---
+
+# Mobile UI
+
+Follow the "Mobile conventions" section of `AGENTS.md`, with the full detail in:
+
+@rules/04-mobile-expo.md
+@rules/07-ui-system.md
+@rules/28-runtime-validation.md
+@rules/27-array-index-readability.md
+
+Reuse the UI kit in `src/ui/` (`@/ui/components/*`, `@/ui/lib/*`) and the app shell in `src/components/` and
+`src/features/`; colours come from the tokens in `src/styles/tokens.css`.

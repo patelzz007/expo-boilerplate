@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "tabWidth": 2,
+  "singleQuote": false,
+  "bracketSameLine": true,
+  "trailingComma": "es5",
+  "ignorePatterns": ["uniwind-types.d.ts", "expo-env.d.ts", "src/styles/tokens.css", "assets/launch-colors.json"],
+  "sortTailwindcss": {
+    "stylesheet": "./global.css",
+    "attributes": ["contentContainerClassName", "colorClassName", "placeholderTextColorClassName", "textClass"],
+    "functions": ["cn", "cva"]
+  }
+}
