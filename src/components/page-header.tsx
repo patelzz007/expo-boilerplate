@@ -7,8 +7,15 @@
 //
 // As the page scrolls (`progress` 0 → 1, src/lib/page-header-scroll.tsx) the header shrinks in place:
 // its background pulls up from the bottom edge, so the content's curved top stays attached to it, and
-// the subtitle stays where it is, fading gently while the rising edge tucks it away. Nothing in the header slides with the content: what is left is
-// one slim bar with the menu, the title and notifications, exactly where they were.
+// the subtitle stays where it is, fading gently while the rising edge tucks it away. Nothing in the
+// header slides with the content: what is left is one slim bar with the menu, the title and
+// notifications, exactly where they were.
+//
+// The bar takes on the content's surface as it collapses: at the top the header is the page's colour
+// (`bg-background`) and the content a raised sheet (`bg-card`) under it; collapsed, the content runs
+// under the bar, so the bar becomes that same surface, with a hairline (`border-border`) to mark where
+// the content passes beneath — not a darker band over a lighter page, which the dark and Nord themes
+// (where the two colours are far apart) made look broken.
 //
 // It is rendered once by the app shell for every signed-in screen — screens never draw their own header.
 // Presentational and controlled: the caller gives the title, subtitle, which control leads and what each
@@ -23,8 +30,10 @@ import * as React from "react";
 import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
   Easing,
+  Extrapolation,
   FadeIn,
   FadeOut,
+  interpolate,
   ReduceMotion,
   useAnimatedStyle,
   withTiming,
@@ -59,6 +68,10 @@ const AT_REST = 0;
  * background edge clips the line as it goes, so the text never shows over the content.
  */
 const SUBTITLE_FADE = Easing.inOut(Easing.quad);
+
+/** The hairline under the collapsed bar appears over the last part of the collapse, as the content reaches it. */
+const HAIRLINE_FADE_START = 0.75;
+const FULLY_COLLAPSED = 1;
 
 export type PageHeaderLeading = "menu" | "back";
 
@@ -181,6 +194,16 @@ export function PageHeader({
   const backgroundStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: -progress.get() * collapseDistance.get() }],
   }));
+  // The bar turns into the content's surface as the content slides under it.
+  const surfaceStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
+  const hairlineStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.get(),
+      [HAIRLINE_FADE_START, FULLY_COLLAPSED],
+      [HIDDEN, VISIBLE],
+      Extrapolation.CLAMP
+    ),
+  }));
   // The subtitle line's frame rises with the background's edge and clips the text, which is held in
   // place by an equal and opposite shift: the edge passes over a still line, tucking it away.
   const subtitleClipStyle = useAnimatedStyle(() => ({
@@ -199,13 +222,24 @@ export function PageHeader({
       className="absolute inset-x-0 top-0"
       style={topInsetStyle}
       testID={testID}>
-      {/* The header's colour, status bar included: it rises from below as the header collapses. */}
+      {/* The header's colour, status bar included: it rises from below as the header collapses, and
+          turns into the content's surface, with a hairline along its bottom edge, as it does. */}
       <StyledAnimatedView
         pointerEvents="none"
         className="absolute inset-0 bg-background"
         style={backgroundStyle}
-        testID={testID === undefined ? undefined : `${testID}-background`}
-      />
+        testID={testID === undefined ? undefined : `${testID}-background`}>
+        <StyledAnimatedView
+          className="absolute inset-0 bg-card"
+          style={surfaceStyle}
+          testID={testID === undefined ? undefined : `${testID}-surface`}
+        />
+        <StyledAnimatedView
+          className="absolute inset-x-0 bottom-0 h-px bg-border"
+          style={hairlineStyle}
+          testID={testID === undefined ? undefined : `${testID}-hairline`}
+        />
+      </StyledAnimatedView>
       <View pointerEvents="box-none" className="px-3">
         <View
           pointerEvents="box-none"

@@ -1,10 +1,11 @@
 // ============================================
 // Home (§10.7) — the starter shell's placeholder dashboard
 // ============================================
-// Shows who is signed in, and the team members read from a public demo API (features/sample-users)
-// through TanStack Query: a skeleton while the first load runs, Previous / Next through the pages
-// (the page on screen stays while the next loads), the cached pages on every later visit, and pull to
-// refresh. A team member opens their details (team/[id].tsx). Products replace this screen with their own.
+// Shows who is signed in, a "Discover" carousel of things to try (features/home-highlights), and the
+// team members read from a public demo API (features/sample-users) through TanStack Query: a skeleton
+// while the first load runs, Previous / Next through the pages (the page on screen stays while the
+// next loads), the cached pages on every later visit, and pull to refresh. A team member opens their
+// details (team/[id].tsx). Products replace this screen with their own.
 //
 // The page lives in the URL (`/?page=2`, lib/url-state), not in component state: a deep link opens
 // the list on that page, and a page past the end (`?page=99`) settles on the last one.
@@ -17,6 +18,7 @@ import { Avatar } from "@/ui/components/avatar";
 import { Card } from "@/ui/components/card";
 import { BodyText, MutedText, Subheading } from "@/ui/components/text";
 import { Screen } from "../../../components/screen";
+import { HomeHighlights } from "../../../features/home-highlights/home-highlights";
 import type { SampleUser } from "../../../features/sample-users/sample-users";
 import { pageCountOf, SampleUsersCard } from "../../../features/sample-users/sample-users-card";
 import { teamMemberHref } from "../../../features/sample-users/team-member-route";
@@ -72,6 +74,7 @@ export default function HomeScreen(): React.JSX.Element {
           </View>
         </Card>
       )}
+      <HomeHighlights />
       <Card title="This is the starter shell">
         <BodyText>
           Sign-in, profile, settings, security and devices are all here as screens. Build your product&apos;s screens on

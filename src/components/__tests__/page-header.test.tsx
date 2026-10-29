@@ -96,6 +96,20 @@ describe("PageHeader", () => {
     expect(opacity).toBeGreaterThan(MOSTLY_VISIBLE);
   });
 
+  it("turns the bar into the content's surface, edged by a hairline, as it collapses", async () => {
+    await renderHeader({ progress: makeMutable(COLLAPSED), collapseDistance: makeMutable(COLLAPSE_DISTANCE) });
+
+    expect(getAnimatedStyle(screen.getByTestId("header-surface"))).toMatchObject({ opacity: 1 });
+    expect(getAnimatedStyle(screen.getByTestId("header-hairline"))).toMatchObject({ opacity: 1 });
+  });
+
+  it("blends part-way into the surface, with no hairline yet, half-way through the collapse", async () => {
+    await renderHeader({ progress: makeMutable(HALF_COLLAPSED), collapseDistance: makeMutable(COLLAPSE_DISTANCE) });
+
+    expect(getAnimatedStyle(screen.getByTestId("header-surface"))).toMatchObject({ opacity: HALF_COLLAPSED });
+    expect(getAnimatedStyle(screen.getByTestId("header-hairline"))).toMatchObject({ opacity: 0 });
+  });
+
   it("shows the whole header at the top of the page", async () => {
     await renderHeader({ collapseDistance: makeMutable(COLLAPSE_DISTANCE) });
 
@@ -103,5 +117,6 @@ describe("PageHeader", () => {
       transform: [{ translateY: -0 }],
     });
     expect(getAnimatedStyle(screen.getByTestId("header-subtitle"))).toMatchObject({ opacity: 1 });
+    expect(getAnimatedStyle(screen.getByTestId("header-surface"))).toMatchObject({ opacity: 0 });
   });
 });
