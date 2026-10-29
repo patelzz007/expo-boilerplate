@@ -2,10 +2,14 @@
 
 import * as React from "react";
 
-import type { ReadyAppRuntime } from "./app-runtime";
+import type { MobileEnv } from "../lib/env";
+import type { ConfigIssue, ReadyAppRuntime } from "./app-runtime";
 
 const ReadyRuntimeContext = React.createContext<ReadyAppRuntime | null>(null);
 ReadyRuntimeContext.displayName = "AppRuntimeContext";
+
+const ConfigIssueContext = React.createContext<ConfigIssue | null>(null);
+ConfigIssueContext.displayName = "ConfigIssueContext";
 
 export interface ReadyRuntimeProviderProps {
   readonly runtime: ReadyAppRuntime;
@@ -14,6 +18,15 @@ export interface ReadyRuntimeProviderProps {
 
 export function ReadyRuntimeProvider({ runtime, children }: ReadyRuntimeProviderProps): React.JSX.Element {
   return <ReadyRuntimeContext.Provider value={runtime}>{children}</ReadyRuntimeContext.Provider>;
+}
+
+export interface ConfigIssueProviderProps {
+  readonly issue: ConfigIssue;
+  readonly children: React.ReactNode;
+}
+
+export function ConfigIssueProvider({ issue, children }: ConfigIssueProviderProps): React.JSX.Element {
+  return <ConfigIssueContext.Provider value={issue}>{children}</ConfigIssueContext.Provider>;
 }
 
 /** Thrown when a screen needs the runtime outside the root providers — a wiring bug. */
@@ -30,4 +43,14 @@ export function useReadyRuntime(): ReadyAppRuntime {
     throw new MissingAppRuntimeError();
   }
   return runtime;
+}
+
+/** The configuration problem the config error screen explains, or `null` when there is none. */
+export function useConfigIssue(): ConfigIssue | null {
+  return React.useContext(ConfigIssueContext);
+}
+
+/** The validated environment of the running app (src/lib/env.ts). */
+export function useMobileEnv(): MobileEnv {
+  return useReadyRuntime().env;
 }

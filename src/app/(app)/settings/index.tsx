@@ -17,13 +17,16 @@ import { PDF_VIEWER_TITLE } from "../../../features/pdf-viewer/labels";
 import { QR_SCANNER_TITLE } from "../../../features/qr-scanner/labels";
 import { usePreferencesCommands, useThemePreference } from "../../../features/preferences/facade";
 import { THEME_LABELS } from "../../../features/preferences/labels";
+import { canReplayOnboarding } from "../../../lib/env";
 import { ROUTES } from "../../../runtime/routes";
+import { useMobileEnv } from "../../../runtime/runtime-context";
 
 /** The app's own version (app.json), shown under About. */
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 
 export default function SettingsScreen(): React.JSX.Element {
   const router = useRouter();
+  const env = useMobileEnv();
   const theme = useThemePreference();
   const signOut = useSignOutConfirmation();
   const preferences = usePreferencesCommands();
@@ -48,7 +51,7 @@ export default function SettingsScreen(): React.JSX.Element {
     router.push(ROUTES.components);
   }, [router]);
 
-  /** Development builds only: onboarding's "seen" flag lives in the Keychain, which outlives reinstalls (ADR 041). */
+  /** Development and test builds only (`canReplayOnboarding`): onboarding's "seen" flag lives in the Keychain, which outlives reinstalls (ADR 041). */
   const replayOnboarding = React.useCallback((): void => {
     preferences.onboardingReset();
     signOutNow().catch((error: unknown): void => {
@@ -81,12 +84,12 @@ export default function SettingsScreen(): React.JSX.Element {
       ) : null}
       <Card title="About">
         <DetailList items={about} />
-        {__DEV__ ? (
+        {canReplayOnboarding(env) ? (
           <Button
             label="Sign out and replay onboarding"
             variant="secondary"
             onPress={replayOnboarding}
-            accessibilityHint="Development builds only: shows the first-launch walkthrough again"
+            accessibilityHint="Development and test builds only: shows the first-launch walkthrough again"
           />
         ) : null}
       </Card>

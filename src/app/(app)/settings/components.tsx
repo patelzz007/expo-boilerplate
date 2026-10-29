@@ -5,8 +5,7 @@
 // body (features/component-gallery/component-gallery-screen-body.tsx and every
 // demo section) is imported only inside a `__DEV__` conditional: Metro replaces
 // `__DEV__` with `false` in a production bundle and drops the branch — and the
-// import with it — before it collects dependencies (the rule the demo accounts
-// follow, contexts/identity/auth/demo-accounts.ts). `__DEV__` must stay a
+// import with it — before it collects dependencies. `__DEV__` must stay a
 // literal here and the import must stay inside the branch. A store build sends
 // this route to Settings; the drawer's Developer section is development-only too.
 

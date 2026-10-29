@@ -3,7 +3,9 @@ import { fireEvent, render, renderHook, screen, waitFor } from "@testing-library
 import * as React from "react";
 import { Pressable, Text } from "react-native";
 
+import { createTestRuntime } from "../../../../test/app-harness";
 import { trackQueryClient } from "../../../../test/query-clients";
+import { ReadyRuntimeProvider } from "../../../runtime/runtime-context";
 import { SampleUsersRequestError } from "../sample-users";
 import {
   retryUnlessNotFound,
@@ -45,9 +47,16 @@ interface WrapperProps {
   readonly children: React.ReactNode;
 }
 
+/** The app runtime the hooks read their configuration from (JSONPlaceholder, the default address). */
+const TEST_RUNTIME = createTestRuntime();
+
 function wrapperFor(queryClient: QueryClient): (props: WrapperProps) => React.JSX.Element {
   return function Wrapper({ children }: WrapperProps): React.JSX.Element {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return (
+      <ReadyRuntimeProvider runtime={TEST_RUNTIME}>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </ReadyRuntimeProvider>
+    );
   };
 }
 
@@ -95,9 +104,11 @@ describe("useSampleUsersPage", () => {
         new Request(input).url.includes("_page=2") ? secondPage : Promise.resolve(pageResponse(API_USERS))
       );
     await render(
-      <QueryClientProvider client={createClient()}>
-        <PagedUsers />
-      </QueryClientProvider>
+      <ReadyRuntimeProvider runtime={TEST_RUNTIME}>
+        <QueryClientProvider client={createClient()}>
+          <PagedUsers />
+        </QueryClientProvider>
+      </ReadyRuntimeProvider>
     );
     expect(await screen.findByText("Page 1: 1, 2")).toBeOnTheScreen();
 

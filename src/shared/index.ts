@@ -14,3 +14,4 @@ export { type EpochMs, EpochMsSchema, epochMs, nowEpochMs } from "./schemas/api/
 export { CanonicalEmailSchema, EMAIL_ADDRESS_MAX_LENGTH, canonicalEmailSchema } from "./schemas/api/email-address";
 export * from "./lib/pdf";
 export * from "./lib/qr";
+export { HttpUrlEnvSchema } from "./runtime/app-env";

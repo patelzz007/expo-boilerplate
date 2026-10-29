@@ -17,6 +17,7 @@ A production-grade React Native starter on **Expo SDK 58**. It ships a complete 
 - [Screenshots](#screenshots)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
+- [Configuration](#configuration)
 - [Scripts](#scripts)
 - [Project structure](#project-structure)
 - [How it works](#how-it-works)
@@ -106,6 +107,28 @@ pnpm ios              # or on an iOS simulator
 ```
 
 Skip the onboarding, then use one of the **Quick sign-in** buttons (Super Admin, Admin or Manager). They appear only in development builds. The demo session lives in memory, so a full reload signs you out.
+
+## Configuration
+
+The app reads its settings from `.env` (git-ignored; copy `.env.example`). Every variable is
+explained in `.env.example`; the same variables as the starter kit's mobile app, plus
+`EXPO_PUBLIC_API_JSON_PLACEHOLDER`.
+
+| Variable | Read by | Default | What it does |
+|---|---|---|---|
+| `EXPO_PUBLIC_API_URL` | `src/lib/env.ts` | empty: no API | The API's `https://` address. Left empty here: this app is not connected to an API yet |
+| `EXPO_PUBLIC_API_PORT` | `src/lib/env.ts` | `8080` | Added to an `http://` API address that names no port (development, or a LAN test APK) |
+| `EXPO_PUBLIC_ALLOW_LAN_HTTP_API` | `src/lib/env.ts`, `app.config.ts` | off | `true`: a release build may use `http://` to a private LAN address (a test APK; run `expo prebuild` after changing it). Never for a store build |
+| `EXPO_PUBLIC_IOS_STORE_URL`, `EXPO_PUBLIC_ANDROID_STORE_URL` | `src/lib/env.ts` | empty | Store pages for an "Update required" screen (`https://` only) |
+| `EXPO_PUBLIC_SHOW_DEMO_ACCOUNT` | `src/lib/env.ts` | off | `true`: the quick sign-in buttons in a release build too (a test APK; the demo passwords are then inside it) |
+| `EXPO_PUBLIC_API_JSON_PLACEHOLDER` | `src/lib/env.ts` | `https://jsonplaceholder.typicode.com` | The public demo API the Team list reads (`https://` only) |
+| `MOBILE_APP_NAME`, `MOBILE_APP_SLUG`, `MOBILE_BUNDLE_ID`, `MOBILE_SCHEME` | `app.config.ts` | `app.json`'s values | The app's name, Expo slug, package / bundle id and URL scheme. Rename the app here, never in code |
+
+`EXPO_PUBLIC_*` values are baked into the app when it is bundled and are public: never put a secret
+in one. A value the app does not accept shows a configuration error screen naming the variable and
+an example; a wrong `MOBILE_*` value stops `expo start` with the variable's name. Change a value,
+then restart Expo (`pnpm start`), or rebuild an installed app. Building an APK, AAB or iOS app:
+[docs/building-installable-apps.md](docs/building-installable-apps.md).
 
 ## Scripts
 

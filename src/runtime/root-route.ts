@@ -6,7 +6,8 @@
 
 import type { SessionRoute } from "../features/session/selectors";
 
-export type AppRootRoute = "starting" | "onboarding" | SessionRoute;
+/** `config-error` is chosen by the root layout before the session exists (an invalid environment, src/lib/env.ts). */
+export type AppRootRoute = "starting" | "config-error" | "onboarding" | SessionRoute;
 
 export interface RootRouteInputs {
   /** The stored preferences (theme, onboarding) have been read. */

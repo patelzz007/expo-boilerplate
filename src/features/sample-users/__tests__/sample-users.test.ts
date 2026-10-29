@@ -4,7 +4,7 @@ import {
   fetchSampleUserDetails,
   fetchSampleUsersPage,
   isUserNotFound,
-  SAMPLE_USERS_URL,
+  sampleUsersUrl,
   SampleUsersRequestError,
 } from "../sample-users";
 import {
@@ -16,6 +16,12 @@ import {
   PARSED_USERS,
   TOTAL_USERS,
 } from "./sample-users-responses";
+
+import { DEFAULT_JSON_PLACEHOLDER_URL } from "../../../lib/env";
+
+/** The address the app is configured with (JSONPlaceholder, the default). */
+const BASE_URL = DEFAULT_JSON_PLACEHOLDER_URL;
+const USERS_URL = sampleUsersUrl(BASE_URL);
 
 const NOT_FOUND = 404;
 const SERVER_ERROR = 500;
@@ -30,9 +36,9 @@ describe("fetchSampleUsersPage", () => {
     const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue(pageResponse(API_USERS));
     const controller = new AbortController();
 
-    await fetchSampleUsersPage(SECOND_PAGE, controller.signal);
+    await fetchSampleUsersPage(BASE_URL, SECOND_PAGE, controller.signal);
 
-    expect(fetchSpy).toHaveBeenCalledWith(`${SAMPLE_USERS_URL}?_page=2&_limit=4`, {
+    expect(fetchSpy).toHaveBeenCalledWith(`${USERS_URL}?_page=2&_limit=4`, {
       signal: controller.signal,
       headers: { Accept: "application/json" },
     });
@@ -41,7 +47,7 @@ describe("fetchSampleUsersPage", () => {
   it("parses the users, keeping only the fields the list shows, and the total from the header", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(pageResponse(API_USERS));
 
-    await expect(fetchSampleUsersPage(SECOND_PAGE, signal())).resolves.toEqual({
+    await expect(fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal())).resolves.toEqual({
       users: PARSED_USERS,
       total: TOTAL_USERS,
     });
@@ -50,7 +56,7 @@ describe("fetchSampleUsersPage", () => {
   it("rejects with the status when the API answers with an error", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, SERVER_ERROR));
 
-    const failure = fetchSampleUsersPage(SECOND_PAGE, signal());
+    const failure = fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal());
 
     await expect(failure).rejects.toBeInstanceOf(SampleUsersRequestError);
     await expect(failure).rejects.toMatchObject({ status: SERVER_ERROR, isClientError: false });
@@ -59,7 +65,7 @@ describe("fetchSampleUsersPage", () => {
   it("rejects a body that is not a list of users", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(pageResponse({ users: API_USERS }));
 
-    await expect(fetchSampleUsersPage(SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
+    await expect(fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
   });
 
   it("rejects a user without a valid email", async () => {
@@ -67,20 +73,20 @@ describe("fetchSampleUsersPage", () => {
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(pageResponse(API_USERS.map((user) => ({ ...user, email: "not-an-email" }))));
 
-    await expect(fetchSampleUsersPage(SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
+    await expect(fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
   });
 
   it("rejects a page without the total-count header", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(API_USERS));
 
-    await expect(fetchSampleUsersPage(SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
+    await expect(fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal())).rejects.toBeInstanceOf(ZodError);
   });
 
   it("passes on a network failure", async () => {
     const offline = new TypeError("Network request failed");
     jest.spyOn(globalThis, "fetch").mockRejectedValue(offline);
 
-    await expect(fetchSampleUsersPage(SECOND_PAGE, signal())).rejects.toBe(offline);
+    await expect(fetchSampleUsersPage(BASE_URL, SECOND_PAGE, signal())).rejects.toBe(offline);
   });
 });
 
@@ -88,14 +94,14 @@ describe("fetchSampleUserDetails", () => {
   it("asks for the one user and parses them in full", async () => {
     const fetchSpy = jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse(API_USER_DETAILS));
 
-    await expect(fetchSampleUserDetails(1, signal())).resolves.toEqual(PARSED_USER_DETAILS);
-    expect(fetchSpy).toHaveBeenCalledWith(`${SAMPLE_USERS_URL}/1`, expect.anything());
+    await expect(fetchSampleUserDetails(BASE_URL, 1, signal())).resolves.toEqual(PARSED_USER_DETAILS);
+    expect(fetchSpy).toHaveBeenCalledWith(`${USERS_URL}/1`, expect.anything());
   });
 
   it("reports an unknown id as not found", async () => {
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({}, NOT_FOUND));
 
-    const error = await fetchSampleUserDetails(99, signal()).then(
+    const error = await fetchSampleUserDetails(BASE_URL, 99, signal()).then(
       (): null => null,
       (failure: Error): Error => failure
     );
@@ -107,7 +113,7 @@ describe("fetchSampleUserDetails", () => {
     // JSON leaves an undefined field out: the body has no address.
     jest.spyOn(globalThis, "fetch").mockResolvedValue(jsonResponse({ ...API_USER_DETAILS, address: undefined }));
 
-    await expect(fetchSampleUserDetails(1, signal())).rejects.toBeInstanceOf(ZodError);
+    await expect(fetchSampleUserDetails(BASE_URL, 1, signal())).rejects.toBeInstanceOf(ZodError);
   });
 });
 
@@ -117,5 +123,11 @@ describe("isUserNotFound", () => {
     expect(isUserNotFound(new SampleUsersRequestError(SERVER_ERROR))).toBe(false);
     expect(isUserNotFound(new TypeError("Network request failed"))).toBe(false);
     expect(isUserNotFound(null)).toBe(false);
+  });
+});
+
+describe("sampleUsersUrl", () => {
+  it("is the users collection on the configured API", () => {
+    expect(sampleUsersUrl("https://demo.example.com")).toBe("https://demo.example.com/users");
   });
 });

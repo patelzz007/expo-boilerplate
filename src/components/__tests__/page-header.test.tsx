@@ -18,6 +18,14 @@ const MOSTLY_VISIBLE = 0.95;
 const SPACING_UNIT = 4;
 const ROW_HEIGHT_CLASS = /\bh-(?<steps>\d+)\b/;
 
+function layout(height: number): {
+  readonly nativeEvent: {
+    readonly layout: { readonly x: number; readonly y: number; readonly width: number; readonly height: number };
+  };
+} {
+  return { nativeEvent: { layout: { x: 0, y: 0, width: 390, height } } };
+}
+
 async function renderHeader(props: Partial<PageHeaderProps> = {}): Promise<void> {
   await render(
     <PageHeader
@@ -39,6 +47,19 @@ async function renderHeader(props: Partial<PageHeaderProps> = {}): Promise<void>
 }
 
 describe("PageHeader", () => {
+  it("reports its full height rounded up, and its subtitle line's height (how far it collapses) rounded down", async () => {
+    const onHeightChange = jest.fn<undefined, [number]>();
+    const onCollapseDistanceChange = jest.fn<undefined, [number]>();
+    await renderHeader({ onHeightChange, onCollapseDistanceChange });
+
+    await fireEvent(screen.getByTestId("header"), "layout", layout(138.4));
+    await fireEvent(screen.getByTestId("header-subtitle-clip"), "layout", layout(35.2));
+
+    expect(onHeightChange).toHaveBeenCalledWith(139);
+    // Rounded down: the bar's edge never rises above the pinned row, so no sliver of the page shows under it.
+    expect(onCollapseDistanceChange).toHaveBeenCalledWith(35);
+  });
+
   it("shows the title and subtitle between the menu and notifications", async () => {
     await renderHeader();
 
@@ -96,18 +117,17 @@ describe("PageHeader", () => {
     expect(opacity).toBeGreaterThan(MOSTLY_VISIBLE);
   });
 
-  it("turns the bar into the content's surface, edged by a hairline, as it collapses", async () => {
+  it("turns the bar into the content's surface as it collapses, with no line between the two", async () => {
     await renderHeader({ progress: makeMutable(COLLAPSED), collapseDistance: makeMutable(COLLAPSE_DISTANCE) });
 
     expect(getAnimatedStyle(screen.getByTestId("header-surface"))).toMatchObject({ opacity: 1 });
-    expect(getAnimatedStyle(screen.getByTestId("header-hairline"))).toMatchObject({ opacity: 1 });
+    expect(screen.queryByTestId("header-hairline")).toBeNull();
   });
 
-  it("blends part-way into the surface, with no hairline yet, half-way through the collapse", async () => {
+  it("blends part-way into the surface half-way through the collapse", async () => {
     await renderHeader({ progress: makeMutable(HALF_COLLAPSED), collapseDistance: makeMutable(COLLAPSE_DISTANCE) });
 
     expect(getAnimatedStyle(screen.getByTestId("header-surface"))).toMatchObject({ opacity: HALF_COLLAPSED });
-    expect(getAnimatedStyle(screen.getByTestId("header-hairline"))).toMatchObject({ opacity: 0 });
   });
 
   it("shows the whole header at the top of the page", async () => {

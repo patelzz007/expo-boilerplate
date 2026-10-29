@@ -5,6 +5,7 @@ import {
   QR_BARCODE_TYPES,
   resolveQrScannerEngine,
   SCAN_CANCELLED_ERROR_CODE,
+  SCAN_FAILED_ERROR_CODE,
 } from "../qr-scanner-engine";
 
 jest.mock("expo-camera", () => mockExpoCamera);
@@ -49,8 +50,13 @@ describe("googleScanOutcomeOfErrorCode", () => {
     expect(googleScanOutcomeOfErrorCode(SCAN_CANCELLED_ERROR_CODE)).toEqual({ kind: "cancelled" });
   });
 
-  it("reads any other failure, or none, as the scanner being unavailable", () => {
+  it("reads a failure after the scanner opened as the person closing it (ML Kit reports the back button as one)", () => {
+    expect(googleScanOutcomeOfErrorCode(SCAN_FAILED_ERROR_CODE)).toEqual({ kind: "cancelled" });
+  });
+
+  it("reads a scanner that could not open, or an unknown failure, as unavailable", () => {
     expect(googleScanOutcomeOfErrorCode("ERR_M_L_KIT_UNAVAILABLE")).toEqual({ kind: "unavailable" });
+    expect(googleScanOutcomeOfErrorCode("ERR_GOOGLE_PLAY_SERVICES_UNAVAILABLE")).toEqual({ kind: "unavailable" });
     expect(googleScanOutcomeOfErrorCode(null)).toEqual({ kind: "unavailable" });
   });
 });

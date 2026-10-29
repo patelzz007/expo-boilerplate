@@ -13,8 +13,8 @@
 //
 // The bar takes on the content's surface as it collapses: at the top the header is the page's colour
 // (`bg-background`) and the content a raised sheet (`bg-card`) under it; collapsed, the content runs
-// under the bar, so the bar becomes that same surface, with a hairline (`border-border`) to mark where
-// the content passes beneath — not a darker band over a lighter page, which the dark and Nord themes
+// under the bar, so the bar becomes that same surface, with no line between the two — not a darker
+// band over a lighter page, which the dark and Nord themes
 // (where the two colours are far apart) made look broken.
 //
 // It is rendered once by the app shell for every signed-in screen — screens never draw their own header.
@@ -30,10 +30,8 @@ import * as React from "react";
 import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
 import Animated, {
   Easing,
-  Extrapolation,
   FadeIn,
   FadeOut,
-  interpolate,
   ReduceMotion,
   useAnimatedStyle,
   withTiming,
@@ -59,6 +57,11 @@ export const PAGE_HEADER_ESTIMATED_HEIGHT = 92;
  */
 export const PAGE_HEADER_ROW_HEIGHT = 56;
 
+/** Where the header's controls end, in points from the top of the screen: the same expanded or collapsed. */
+export function pageHeaderControlsBottom(topInset: number): number {
+  return topInset + PAGE_HEADER_ROW_HEIGHT;
+}
+
 const HIDDEN = 0;
 const VISIBLE = 1;
 const AT_REST = 0;
@@ -69,9 +72,16 @@ const AT_REST = 0;
  */
 const SUBTITLE_FADE = Easing.inOut(Easing.quad);
 
-/** The hairline under the collapsed bar appears over the last part of the collapse, as the content reaches it. */
-const HAIRLINE_FADE_START = 0.75;
-const FULLY_COLLAPSED = 1;
+/**
+ * How far the header collapses: the subtitle line's measured height, rounded DOWN to whole points.
+ * The background rises by exactly this much, so rounding up would lift its edge a fraction of a
+ * point above the pinned row, where the content's scroll view starts: a sliver of the page's colour
+ * then showed between the bar and the content (a hairline in the dark themes). Rounded down, the
+ * bar's edge stays at or just below the row, over the top of the content, in the same colour.
+ */
+export function collapseDistanceOf(event: LayoutChangeEvent): number {
+  return Math.floor(event.nativeEvent.layout.height);
+}
 
 export type PageHeaderLeading = "menu" | "back";
 
@@ -184,7 +194,7 @@ export function PageHeader({
   );
   const reportCollapseDistance = React.useCallback(
     (event: LayoutChangeEvent): void => {
-      onCollapseDistanceChange?.(Math.ceil(event.nativeEvent.layout.height));
+      onCollapseDistanceChange?.(collapseDistanceOf(event));
     },
     [onCollapseDistanceChange]
   );
@@ -196,14 +206,6 @@ export function PageHeader({
   }));
   // The bar turns into the content's surface as the content slides under it.
   const surfaceStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
-  const hairlineStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(
-      progress.get(),
-      [HAIRLINE_FADE_START, FULLY_COLLAPSED],
-      [HIDDEN, VISIBLE],
-      Extrapolation.CLAMP
-    ),
-  }));
   // The subtitle line's frame rises with the background's edge and clips the text, which is held in
   // place by an equal and opposite shift: the edge passes over a still line, tucking it away.
   const subtitleClipStyle = useAnimatedStyle(() => ({
@@ -223,7 +225,8 @@ export function PageHeader({
       style={topInsetStyle}
       testID={testID}>
       {/* The header's colour, status bar included: it rises from below as the header collapses, and
-          turns into the content's surface, with a hairline along its bottom edge, as it does. */}
+          turns into the content's surface as it does, with no line along its bottom edge. The surface
+          stays inside the moving layer, so it rises with its edge. */}
       <StyledAnimatedView
         pointerEvents="none"
         className="absolute inset-0 bg-background"
@@ -233,11 +236,6 @@ export function PageHeader({
           className="absolute inset-0 bg-card"
           style={surfaceStyle}
           testID={testID === undefined ? undefined : `${testID}-surface`}
-        />
-        <StyledAnimatedView
-          className="absolute inset-x-0 bottom-0 h-px bg-border"
-          style={hairlineStyle}
-          testID={testID === undefined ? undefined : `${testID}-hairline`}
         />
       </StyledAnimatedView>
       <View pointerEvents="box-none" className="px-3">

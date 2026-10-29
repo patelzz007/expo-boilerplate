@@ -282,6 +282,8 @@ export const SharedColorNameSchema = z.enum([
   "print-row-alt",
   "qr-background",
   "qr-foreground",
+  "document-match",
+  "document-match-active",
   "success-foreground",
   "warning-foreground",
   "info-foreground",

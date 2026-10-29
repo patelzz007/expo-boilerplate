@@ -1,11 +1,13 @@
 // ============================================
 // app-runtime.ts - everything the app builds once per start (§9.4)
 // ============================================
-// The app's name and version, the query client, and the session and preferences stores. Nothing here
-// runs at module scope; the root layout calls `createAppRuntime` once.
+// In order: the environment check (an invalid one stops here: the config error screen), the app's
+// name and version, the query client, and the session and preferences stores. Nothing here runs at
+// module scope; the root layout calls `createAppRuntime` once.
 
 import type { QueryClient } from "@tanstack/react-query";
 
+import { resolveMobileEnv, type MobileEnv, type RawMobileEnv } from "../lib/env";
 import { clearQueryClient, createMobileQueryClient } from "../lib/query-client";
 import type { ThemePreference } from "../lib/secure-store";
 import { preferencesActions } from "../features/preferences/actions";
@@ -13,7 +15,16 @@ import type { PreferencesState } from "../features/preferences/state";
 import { createPreferencesStore, type PreferencesStore } from "../features/preferences/store";
 import { createSessionStore, type SessionStore } from "../features/session/store";
 
+/** Why the app cannot start: what is wrong and an example of a right value — never the configured value. */
+export interface ConfigIssue {
+  readonly subject: string;
+  readonly message: string;
+  readonly example: string;
+}
+
 export interface ReadyAppRuntime {
+  readonly kind: "ready";
+  readonly env: MobileEnv;
   readonly appName: string;
   readonly appVersion: string;
   /** The native build number, or `null` when the build reports none (Expo Go). */
@@ -23,8 +34,11 @@ export interface ReadyAppRuntime {
   readonly preferencesStore: PreferencesStore;
 }
 
+export type AppRuntime = { readonly kind: "configError"; readonly issue: ConfigIssue } | ReadyAppRuntime;
+
 /** What the runtime reads from the device and the build (injected, so tests pass their own). */
 export interface AppRuntimeInputs {
+  readonly rawEnv: RawMobileEnv;
   readonly appName: string;
   readonly appVersion: string;
   readonly buildNumber: string | null;
@@ -34,7 +48,12 @@ export interface AppRuntimeInputs {
   readonly reportWarning: (message: string, error: Error) => void;
 }
 
-export function createAppRuntime(inputs: AppRuntimeInputs): ReadyAppRuntime {
+export function createAppRuntime(inputs: AppRuntimeInputs): AppRuntime {
+  const envResult = resolveMobileEnv(inputs.rawEnv);
+  if (!envResult.ok) {
+    const { variable, message, example } = envResult.issue;
+    return { kind: "configError", issue: { subject: variable, message, example } };
+  }
   const queryClient = createMobileQueryClient();
   const sessionStore = createSessionStore({
     clearServerState: (): void => {
@@ -49,6 +68,8 @@ export function createAppRuntime(inputs: AppRuntimeInputs): ReadyAppRuntime {
     },
   });
   return {
+    kind: "ready",
+    env: envResult.env,
     appName: inputs.appName,
     appVersion: inputs.appVersion,
     buildNumber: inputs.buildNumber,

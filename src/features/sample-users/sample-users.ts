@@ -3,12 +3,16 @@
 // app runs on local sample data. Responses cross a trust boundary, so they are parsed with zod once,
 // here (rules/28); everything past this file uses the parsed types.
 //
-// The address is the same in every environment (it is a public demo service, not this product's API),
-// so it is a constant rather than Expo config.
+// The address is configuration: `EXPO_PUBLIC_API_JSON_PLACEHOLDER`, validated with the app's other
+// public variables (src/lib/env.ts) and JSONPlaceholder when unset. The hooks (use-sample-users.ts)
+// pass it in; this file only builds the requests.
 
 import { z } from "zod";
 
-export const SAMPLE_USERS_URL = "https://jsonplaceholder.typicode.com/users";
+/** The users collection on a JSONPlaceholder-compatible API (`baseUrl` has no trailing slash). */
+export function sampleUsersUrl(baseUrl: string): string {
+  return `${baseUrl}/users`;
+}
 
 /** The header the API answers a paged request with: how many users there are in all. */
 export const TOTAL_COUNT_HEADER = "X-Total-Count";
@@ -101,10 +105,11 @@ async function getJson(url: string, signal: AbortSignal): Promise<Response> {
  * fetch error when the network fails or `signal` aborts (TanStack Query aborts a cancelled query).
  */
 export async function fetchSampleUsersPage(
+  baseUrl: string,
   { page, pageSize }: SampleUsersPageRequest,
   signal: AbortSignal
 ): Promise<SampleUsersPage> {
-  const response = await getJson(`${SAMPLE_USERS_URL}?_page=${String(page)}&_limit=${String(pageSize)}`, signal);
+  const response = await getJson(`${sampleUsersUrl(baseUrl)}?_page=${String(page)}&_limit=${String(pageSize)}`, signal);
   return {
     users: sampleUsersSchema.parse(await response.json()),
     total: totalCountSchema.parse(response.headers.get(TOTAL_COUNT_HEADER)),
@@ -112,7 +117,11 @@ export async function fetchSampleUsersPage(
 }
 
 /** Fetches and parses one user in full; rejects like `fetchSampleUsersPage` (a 404 for an unknown id). */
-export async function fetchSampleUserDetails(id: number, signal: AbortSignal): Promise<SampleUserDetails> {
-  const response = await getJson(`${SAMPLE_USERS_URL}/${String(id)}`, signal);
+export async function fetchSampleUserDetails(
+  baseUrl: string,
+  id: number,
+  signal: AbortSignal
+): Promise<SampleUserDetails> {
+  const response = await getJson(`${sampleUsersUrl(baseUrl)}/${String(id)}`, signal);
   return sampleUserDetailsSchema.parse(await response.json());
 }

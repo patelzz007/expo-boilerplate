@@ -1,6 +1,7 @@
 // Every route of the app, by name — screens never hand-type a path (rules/00, "No magic").
 
 export const ROUTES = {
+  configError: "/config-error",
   onboarding: "/onboarding",
   signIn: "/sign-in",
   signUp: "/sign-up",

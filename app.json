@@ -38,7 +38,9 @@
           "barcodeScannerEnabled": true
         }
       ],
-      "./config-plugins/google-code-scanner-module.ts"
+      "./config-plugins/google-code-scanner-module.ts",
+      "./config-plugins/release-keep-rules.ts",
+      "./config-plugins/autofill-highlight.ts"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -57,7 +59,11 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#24364f"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "package": "com.bishen.helloworld"
     }
   }
 }

@@ -6,6 +6,7 @@
 import { keepPreviousData, skipToken, useQuery, type UseQueryResult } from "@tanstack/react-query";
 
 import { MAX_QUERY_RETRIES } from "../../lib/query-client";
+import { useMobileEnv } from "../../runtime/runtime-context";
 import {
   fetchSampleUserDetails,
   fetchSampleUsersPage,
@@ -18,7 +19,10 @@ import {
 /** Users per page of the Home screen's list (JSONPlaceholder has 10). */
 export const SAMPLE_USERS_PAGE_SIZE = 4;
 
-/** The feature's query keys, built in one place so every input is part of its key (rules/06). */
+/**
+ * The feature's query keys, built in one place so every input is part of its key (rules/06). The API's
+ * address is not an input: it is configuration, fixed for the app's life (src/lib/env.ts).
+ */
 export const sampleUserKeys = {
   all: (): readonly ["sample-users"] => ["sample-users"],
   lists: (): readonly ["sample-users", "list"] => ["sample-users", "list"],
@@ -38,10 +42,11 @@ export function retryUnlessNotFound(failureCount: number, error: Error): boolean
 
 /** One page of the list (1-based). */
 export function useSampleUsersPage(page: number): UseQueryResult<SampleUsersPage> {
+  const { jsonPlaceholderUrl } = useMobileEnv();
   const request: SampleUsersPageRequest = { page, pageSize: SAMPLE_USERS_PAGE_SIZE };
   return useQuery({
     queryKey: sampleUserKeys.list(request),
-    queryFn: ({ signal }): Promise<SampleUsersPage> => fetchSampleUsersPage(request, signal),
+    queryFn: ({ signal }): Promise<SampleUsersPage> => fetchSampleUsersPage(jsonPlaceholderUrl, request, signal),
     placeholderData: keepPreviousData,
     retry: retryUnlessNotFound,
   });
@@ -49,9 +54,13 @@ export function useSampleUsersPage(page: number): UseQueryResult<SampleUsersPage
 
 /** One user in full; `null` (a route without a valid id) requests nothing. */
 export function useSampleUserDetails(id: number | null): UseQueryResult<SampleUserDetails> {
+  const { jsonPlaceholderUrl } = useMobileEnv();
   return useQuery({
     queryKey: sampleUserKeys.detail(id),
-    queryFn: id === null ? skipToken : ({ signal }): Promise<SampleUserDetails> => fetchSampleUserDetails(id, signal),
+    queryFn:
+      id === null
+        ? skipToken
+        : ({ signal }): Promise<SampleUserDetails> => fetchSampleUserDetails(jsonPlaceholderUrl, id, signal),
     retry: retryUnlessNotFound,
   });
 }

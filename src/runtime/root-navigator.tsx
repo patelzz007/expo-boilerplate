@@ -5,9 +5,10 @@
 // every other one. Screens never decide where to go after signing in or out — they report what
 // happened to the session store, and this guard moves the app.
 //
-// | State     | Routes allowed                                         |
-// | SignedOut | onboarding only, until it is done (ADR 041); then (auth) |
-// | SignedIn  | (app) only                                             |
+// | State       | Routes allowed                                           |
+// | ConfigError | config-error only                                        |
+// | SignedOut   | onboarding only, until it is done (ADR 041); then (auth) |
+// | SignedIn    | (app) only                                               |
 
 import { Stack } from "expo-router";
 import * as React from "react";
@@ -30,6 +31,7 @@ const SCREEN_OPTIONS = { headerShown: false, animation: ROOT_TRANSITION } satisf
  * `/` — a URL it has no screen for.
  */
 const ROOT_ROUTE_ENTRY = {
+  "config-error": ROUTES.configError,
   onboarding: ROUTES.onboarding,
   auth: ROUTES.signIn,
   app: ROUTES.home,
@@ -40,6 +42,9 @@ export function RootStack({ route }: RootStackProps): React.JSX.Element {
   const entry = ROOT_ROUTE_ENTRY[route];
   return (
     <Stack screenOptions={SCREEN_OPTIONS}>
+      <Stack.Protected redirectTo={entry} guard={route === "config-error"}>
+        <Stack.Screen name="config-error" />
+      </Stack.Protected>
       <Stack.Protected redirectTo={entry} guard={route === "onboarding"}>
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
       </Stack.Protected>

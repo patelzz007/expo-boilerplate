@@ -44,7 +44,7 @@ export default function SignInScreen(): React.JSX.Element {
   const submit = React.useCallback((): void => {
     void form.handleSubmit();
   }, [form]);
-  /** A demo login (development builds only): fill the fields so the user sees what is sent, then sign in — as the web does. */
+  /** A demo login: fill the fields so the user sees what is sent, then sign in — as the web does. */
   const signInAsDemo = React.useCallback(
     (email: string): void => {
       const account = demoAccounts.find((candidate: DemoAccount): boolean => candidate.email === email);
