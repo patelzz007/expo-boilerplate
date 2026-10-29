@@ -12,7 +12,7 @@ const STALE_TIME_MS = 30_000;
 const GC_TIME_MS = 300_000;
 
 /** A failed query is retried this many times. */
-const MAX_QUERY_RETRIES = 2;
+export const MAX_QUERY_RETRIES = 2;
 
 /**
  * Drops every cached query AND mutation and stops their garbage-collection timers.

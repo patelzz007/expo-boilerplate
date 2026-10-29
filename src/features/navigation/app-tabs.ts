@@ -1,5 +1,5 @@
 // The (app) group's tabs, in the order the tab bar shows them: one entry per
-// route file directly inside src/app/(app). The tabs layout declares its
+// route directly inside src/app/(app) (a file, or a folder with its own stack). The tabs layout declares its
 // screens from this list and the tab bar takes each tab's title and icon from
 // it, so a tab is added, renamed or reordered here and nowhere else.
 
@@ -12,8 +12,8 @@ import UserIcon from "lucide-react-native/icons/user";
 import type { LucideIcon } from "@/ui/components/icon";
 import { ROUTES, type AppRoute } from "../../runtime/routes";
 
-/** A tab's route name: its file name inside src/app/(app) (`index` is Home). */
-export type AppTabName = "index" | "analytics" | "search" | "profile" | "settings";
+/** A tab's route name inside src/app/(app): Home is the `(home)` group, its own stack at "/". */
+export type AppTabName = "(home)" | "analytics" | "search" | "profile" | "settings";
 
 export interface AppTab {
   readonly name: AppTabName;
@@ -24,7 +24,7 @@ export interface AppTab {
 }
 
 export const APP_TABS: readonly AppTab[] = [
-  { name: "index", title: "Home", icon: HouseIcon, route: ROUTES.home },
+  { name: "(home)", title: "Home", icon: HouseIcon, route: ROUTES.home },
   { name: "analytics", title: "Analytics", icon: ChartColumnIcon, route: ROUTES.analytics },
   { name: "search", title: "Search", icon: SearchIcon, route: ROUTES.search },
   { name: "profile", title: "Profile", icon: UserIcon, route: ROUTES.profile },

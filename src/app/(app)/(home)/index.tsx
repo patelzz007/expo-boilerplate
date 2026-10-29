@@ -2,30 +2,46 @@
 // Home (§10.7) — the starter shell's placeholder dashboard
 // ============================================
 // Shows who is signed in, and the team members read from a public demo API (features/sample-users)
-// through TanStack Query: a skeleton while the first load runs, the cached list on every later visit,
-// pull to refresh. Products replace this screen with their own.
+// through TanStack Query: a skeleton while the first load runs, Previous / Next through the pages
+// (the page on screen stays while the next loads), the cached pages on every later visit, and pull to
+// refresh. A team member opens their details (team/[id].tsx). Products replace this screen with their own.
 
+import { useRouter } from "expo-router";
 import * as React from "react";
 import { View } from "react-native";
 
 import { Avatar } from "@/ui/components/avatar";
 import { Card } from "@/ui/components/card";
 import { BodyText, MutedText, Subheading } from "@/ui/components/text";
-import { Screen } from "../../components/screen";
-import { SampleUsersCard } from "../../features/sample-users/sample-users-card";
-import { useSampleUsers } from "../../features/sample-users/use-sample-users";
-import { useSessionUser } from "../../features/session/facade";
+import { Screen } from "../../../components/screen";
+import type { SampleUser } from "../../../features/sample-users/sample-users";
+import { SampleUsersCard } from "../../../features/sample-users/sample-users-card";
+import { teamMemberHref } from "../../../features/sample-users/team-member-route";
+import { SAMPLE_USERS_PAGE_SIZE, useSampleUsersPage } from "../../../features/sample-users/use-sample-users";
+import { useSessionUser } from "../../../features/session/facade";
+
+const FIRST_PAGE = 1;
 
 export default function HomeScreen(): React.JSX.Element {
   const user = useSessionUser();
-  const sampleUsers = useSampleUsers();
+  const router = useRouter();
+  const [page, setPage] = React.useState(FIRST_PAGE);
+  const sampleUsers = useSampleUsersPage(page);
   const { refetch } = sampleUsers;
+  // Moving to another page also refetches; only a refetch of the page on screen is a refresh.
+  const refreshing = sampleUsers.isRefetching && !sampleUsers.isPlaceholderData;
   const refresh = React.useCallback((): void => {
     void refetch();
   }, [refetch]);
+  const openTeamMember = React.useCallback(
+    (member: SampleUser): void => {
+      router.push(teamMemberHref(member.id));
+    },
+    [router]
+  );
 
   return (
-    <Screen refreshing={sampleUsers.isRefetching} onRefresh={refresh}>
+    <Screen refreshing={refreshing} onRefresh={refresh}>
       {user === null ? null : (
         <Card>
           <View className="flex-row items-center gap-4">
@@ -48,9 +64,14 @@ export default function HomeScreen(): React.JSX.Element {
       </Card>
       <SampleUsersCard
         status={sampleUsers.status}
-        users={sampleUsers.data}
+        data={sampleUsers.data}
+        page={page}
+        pageSize={SAMPLE_USERS_PAGE_SIZE}
+        onPageChange={setPage}
+        changingPage={sampleUsers.isPlaceholderData}
+        onSelect={openTeamMember}
         onRetry={refresh}
-        retrying={sampleUsers.isRefetching}
+        retrying={refreshing}
       />
     </Screen>
   );

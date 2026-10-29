@@ -3,9 +3,10 @@
 // resolves both from the path the moment it changes, so the new title moves in step with the page
 // instead of a frame after it.
 
-import { ROUTES, type AppRoute } from "../../runtime/routes";
+import { ROUTES, TEAM_MEMBER_PATH, type AppRoute } from "../../runtime/routes";
 import { PDF_VIEWER_TITLE } from "../pdf-viewer/labels";
 import { QR_SCANNER_TITLE } from "../qr-scanner/labels";
+import { SAMPLE_USER_DETAILS_SUBTITLE, SAMPLE_USER_DETAILS_TITLE } from "../sample-users/labels";
 import { APP_TABS, type AppTab } from "./app-tabs";
 import { SCREEN_TITLES } from "./screen-titles";
 
@@ -16,7 +17,7 @@ export interface ScreenHeading {
 
 /** Each tab's subtitle; the tab's title comes from APP_TABS. */
 const TAB_SUBTITLES: Readonly<Record<AppTab["name"], string>> = {
-  index: "Your account at a glance",
+  "(home)": "Your account at a glance",
   analytics: "Your activity over time",
   search: "Find anything in the app",
   profile: "Your personal details",
@@ -40,9 +41,24 @@ const HEADINGS: ReadonlyMap<string, ScreenHeading> = new Map<string, ScreenHeadi
   ...SUB_SCREEN_HEADINGS,
 ]);
 
+interface DynamicHeading {
+  readonly path: RegExp;
+  readonly heading: ScreenHeading;
+}
+
+/** Screens whose path carries an id ("/team/3"): matched by pattern, after the fixed paths. */
+const DYNAMIC_HEADINGS: readonly DynamicHeading[] = [
+  { path: TEAM_MEMBER_PATH, heading: { title: SAMPLE_USER_DETAILS_TITLE, subtitle: SAMPLE_USER_DETAILS_SUBTITLE } },
+];
+
 const NO_HEADING: ScreenHeading = { title: "", subtitle: "" };
 
 /** The heading of the screen at `pathname`; empty for a path the app does not have. */
 export function screenHeadingOf(pathname: string): ScreenHeading {
-  return HEADINGS.get(pathname) ?? NO_HEADING;
+  const heading = HEADINGS.get(pathname);
+  if (heading !== undefined) {
+    return heading;
+  }
+  const dynamic = DYNAMIC_HEADINGS.find(({ path }): boolean => path.test(pathname));
+  return dynamic?.heading ?? NO_HEADING;
 }

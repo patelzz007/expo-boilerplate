@@ -22,3 +22,15 @@ export const ROUTES = {
 
 /** Any one of the app's routes. */
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
+
+/**
+ * Routes with a parameter in their path. They are pushed as `{ pathname, params }` (an href helper
+ * beside the screen's feature), never navigated to as a bare path, so they stay out of `ROUTES`.
+ */
+export const DYNAMIC_ROUTES = {
+  /** One team member, by their id: `router.push(teamMemberHref(id))` (features/sample-users). */
+  teamMember: "/team/[id]",
+} satisfies Record<string, `/${string}`>;
+
+/** The paths DYNAMIC_ROUTES.teamMember resolves to ("/team/3"), for code that maps a path back to its screen. */
+export const TEAM_MEMBER_PATH = /^\/team\/[^/]+$/;
