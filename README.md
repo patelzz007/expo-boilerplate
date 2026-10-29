@@ -32,7 +32,7 @@ A production-grade React Native starter on **Expo SDK 58**. It ships a complete 
 | **Edge to edge** | The app draws under the status bar and navigation bar, and the status bar icons follow the theme. |
 | **Theming** | Light, Dark and Nord themes, or follow the system. The tokens are generated from one source (`src/tokens/`) and applied with Uniwind. |
 | **UI kit** | 70+ accessible components in `src/ui/`: buttons, fields, date pickers, sheets, dialogs, toasts, skeletons, charts, tables, timelines and more. They are browsable in-app under **Settings → Components**. |
-| **Data** | TanStack Query for server state, with a live example: Home lists team members from [JSONPlaceholder](https://jsonplaceholder.typicode.com) with server-side pagination (Previous / Next; the current page stays on screen while the next loads). Tapping a person opens their details page (contact, address, company). Responses are parsed with zod and each page and person is cached. Skeleton loaders, retry, a not-found state and pull-to-refresh are included. |
+| **Data** | TanStack Query for server state, with a live example: Home lists team members from [JSONPlaceholder](https://jsonplaceholder.typicode.com) with server-side pagination (Previous / Next, with the page in the URL as `?page=`; the current page stays on screen while the next loads). Tapping a person opens their details page (contact, address, company). Responses are parsed with zod and each page and person is cached. Skeleton loaders, retry, a not-found state and pull-to-refresh are included. |
 | **Forms** | TanStack Form with zod validation: sign-in, sign-up, forgot password, change password, profile. |
 | **Account** | Profile, security (change password), signed-in devices with revoke and "sign out everywhere", all on local sample data. |
 | **Analytics** | An activity dashboard with 7-day, 30-day, 90-day and custom ranges, an interactive chart and stat tiles. |
@@ -83,6 +83,7 @@ All screens below were captured from the app running in Expo Go (Android, Pixel 
 | Server state | TanStack Query 5 |
 | Forms | TanStack Form + zod 4 |
 | Client state | Zustand 5 feature stores (reducer + facade pattern) |
+| URL state | nuqs, through `src/lib/url-state` (`defineUrlState` / `useUrlState`) with a custom Expo Router adapter |
 | Animation | Reanimated 4 + react-native-worklets |
 | Icons and fonts | Lucide · Geist, Bricolage Grotesque, Geist Mono |
 | Device | expo-camera, expo-secure-store, expo-file-system, expo-document-picker, expo-sharing, expo-haptics |
@@ -159,6 +160,7 @@ test/                    Jest fakes and harness for native boundaries
 - **Styling.** Use only `className` utilities over semantic tokens (`bg-card`, `text-muted-foreground`, …). Colour literals and inline style objects fail lint. Colour props take `accent-*` classes. Third-party components get `withUniwind(...)` once.
 - **Themes.** Edit `src/tokens/`, run `pnpm tokens:generate`, and Uniwind switches between `light`, `dark` and `nord` at runtime. A test fails if the generated CSS is stale.
 - **Server state.** Each feature centralises its query keys and parses responses with zod once, at the boundary. See `src/features/sample-users/` for the full pattern: a paged list (`useSampleUsersPage`, keyed by page and page size, keeping the previous page as placeholder data) and a detail query (`useSampleUserDetails`, keyed by id). It never retries a 404.
+- **URL state.** Shareable, deep-linkable screen state (a list's page, filters, sort) lives in the route's params, not in `useState`. Declare it once with `defineUrlState` (zod per param; a bad or missing value falls back to its default), then read and write it with `useUrlState`. The engine is [nuqs](https://nuqs.dev) behind a custom Expo Router adapter (`src/lib/url-state/url-state-provider.tsx`), so screens never import nuqs. Home's page works this way: `/?page=2` opens page 2, and a page past the end settles on the last one. On a phone, updates replace the screen's params in place, so Back leaves the screen instead of stepping through pages. URL state is for deep links and shareable state; it doesn't survive an app restart.
 - **Dynamic routes.** Routes with a parameter (`/team/[id]`) live in `DYNAMIC_ROUTES` (`src/runtime/routes.ts`). They are pushed through an href helper (`teamMemberHref(id)`), and their params are parsed with zod before use.
 - **Storage.** Use `expo-secure-store` only, with values parsed by zod on read. Never AsyncStorage.
 - **Expo Go limits.** The QR scanner works in Expo Go. The PDF viewer's native page renderer needs a development build; in Expo Go it falls back to opening the PDF in another app.

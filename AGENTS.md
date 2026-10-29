@@ -24,6 +24,7 @@ Here, only the mobile app exists, so read them through this mapping:
 | `packages/tokens`, `pnpm tokens:generate`, `mobile.css` | the token source in [`src/tokens/`](src/tokens/); `pnpm run tokens:generate` writes [`src/styles/tokens.css`](src/styles/tokens.css) (themes light, dark, nord) and the launch assets. Never edit the generated files by hand — a test fails while they are stale |
 | `packages/ui-native` (`@workspace/ui-native/…`) | the UI kit in [`src/ui/`](src/ui/) (`@/ui/components/…`, `@/ui/lib/…`) |
 | `packages/shared` (`@workspace/shared`) | the vendored subset in [`src/shared/`](src/shared/) (`@/shared`) |
+| `@workspace/client/lib/url-state` (`defineUrlState`, `useUrlState`, `UrlStateProvider`) | [`src/lib/url-state/`](src/lib/url-state/): the same API on nuqs, with an Expo Router adapter. Updates write the screen's params in place (no history entries on a phone). Tests use `UrlStateTestProvider` |
 | `apps/api`, `apps/web`, Prisma, Kafka/BullMQ, S3, tenants | not in this repo — those rules apply only when the code they govern is added |
 | `@workspace/api-client`, real sessions | none: the app is UI-only. The session is a local demo (`src/features/session`) and screens use sample data |
 

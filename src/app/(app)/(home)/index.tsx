@@ -5,6 +5,9 @@
 // through TanStack Query: a skeleton while the first load runs, Previous / Next through the pages
 // (the page on screen stays while the next loads), the cached pages on every later visit, and pull to
 // refresh. A team member opens their details (team/[id].tsx). Products replace this screen with their own.
+//
+// The page lives in the URL (`/?page=2`, lib/url-state), not in component state: a deep link opens
+// the list on that page, and a page past the end (`?page=99`) settles on the last one.
 
 import { useRouter } from "expo-router";
 import * as React from "react";
@@ -15,18 +18,34 @@ import { Card } from "@/ui/components/card";
 import { BodyText, MutedText, Subheading } from "@/ui/components/text";
 import { Screen } from "../../../components/screen";
 import type { SampleUser } from "../../../features/sample-users/sample-users";
-import { SampleUsersCard } from "../../../features/sample-users/sample-users-card";
+import { pageCountOf, SampleUsersCard } from "../../../features/sample-users/sample-users-card";
 import { teamMemberHref } from "../../../features/sample-users/team-member-route";
+import { TEAM_MEMBERS_URL_STATE } from "../../../features/sample-users/team-members-url-state";
 import { SAMPLE_USERS_PAGE_SIZE, useSampleUsersPage } from "../../../features/sample-users/use-sample-users";
 import { useSessionUser } from "../../../features/session/facade";
-
-const FIRST_PAGE = 1;
+import { useUrlState } from "../../../lib/url-state/use-url-state";
 
 export default function HomeScreen(): React.JSX.Element {
   const user = useSessionUser();
   const router = useRouter();
-  const [page, setPage] = React.useState(FIRST_PAGE);
+  const [{ page }, updateUrlState] = useUrlState(TEAM_MEMBERS_URL_STATE);
   const sampleUsers = useSampleUsersPage(page);
+  const changePage = React.useCallback(
+    (next: number): void => {
+      updateUrlState({ page: next });
+    },
+    [updateUrlState]
+  );
+  // A link past the last page lands on the last page, once the list says how many there are.
+  const lastPage =
+    sampleUsers.data === undefined || sampleUsers.isPlaceholderData
+      ? null
+      : pageCountOf(sampleUsers.data.total, SAMPLE_USERS_PAGE_SIZE);
+  React.useEffect((): void => {
+    if (lastPage !== null && page > lastPage) {
+      updateUrlState({ page: lastPage }, { history: "replace" });
+    }
+  }, [lastPage, page, updateUrlState]);
   const { refetch } = sampleUsers;
   // Moving to another page also refetches; only a refetch of the page on screen is a refresh.
   const refreshing = sampleUsers.isRefetching && !sampleUsers.isPlaceholderData;
@@ -67,7 +86,7 @@ export default function HomeScreen(): React.JSX.Element {
         data={sampleUsers.data}
         page={page}
         pageSize={SAMPLE_USERS_PAGE_SIZE}
-        onPageChange={setPage}
+        onPageChange={changePage}
         changingPage={sampleUsers.isPlaceholderData}
         onSelect={openTeamMember}
         onRetry={refresh}
