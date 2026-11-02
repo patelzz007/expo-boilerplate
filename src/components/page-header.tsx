@@ -2,7 +2,8 @@
 // edge, as the starter kit does). It has two parts:
 //
 // - the pinned row — the leading control (the menu, or back) on the left, the notifications button on
-//   the right and, centred between them, the page's title. The row never moves.
+//   the right (its unread count on its corner) and, centred between them, the page's title. The row
+//   never moves.
 // - the subtitle line — centred under the title, between the two buttons.
 //
 // As the page scrolls (`progress` 0 → 1, src/lib/page-header-scroll.tsx) the header shrinks in place:
@@ -40,6 +41,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { withUniwind } from "uniwind";
 
+import { CountBadge } from "@/ui/components/count-badge";
 import { Icon, type LucideIcon } from "@/ui/components/icon";
 import { CONTROL_SWAP_MS, PAGE_TITLE_TIMING } from "@/ui/lib/motion";
 
@@ -98,6 +100,8 @@ export interface PageHeaderProps {
   readonly onMenu: () => void;
   readonly onBack: () => void;
   readonly onNotifications: () => void;
+  /** Unread notifications: a count on the bell's corner, and in its spoken name. Nothing at zero. */
+  readonly notificationCount?: number;
   /** The status bar's height: the band's colour runs up behind it. */
   readonly topInset: number;
   /** 0 expanded … 1 collapsed, from the page's scroll position. */
@@ -167,6 +171,7 @@ export function PageHeader({
   onMenu,
   onBack,
   onNotifications,
+  notificationCount = 0,
   topInset,
   progress,
   collapseDistance,
@@ -281,9 +286,17 @@ export function PageHeader({
           </View>
           <HeaderIconButton
             icon={BellIcon}
-            accessibilityLabel="Notifications"
+            accessibilityLabel={notificationsLabelOf(notificationCount)}
             onPress={onNotifications}
             testID={testID === undefined ? undefined : `${testID}-notifications`}
+            badge={
+              <CountBadge
+                count={notificationCount}
+                size="sm"
+                className="absolute top-0.5 right-0"
+                testID={testID === undefined ? undefined : `${testID}-notification-count`}
+              />
+            }
           />
         </View>
       </View>
@@ -327,11 +340,24 @@ interface HeaderIconButtonProps {
   readonly icon: LucideIcon;
   readonly accessibilityLabel: string;
   readonly onPress: () => void;
+  /** Pinned to the button's corner (the bell's unread count). */
+  readonly badge?: React.ReactNode;
   readonly testID: string | undefined;
 }
 
+/** The bell's spoken name: "Notifications", and how many are unread when any are. */
+export function notificationsLabelOf(count: number): string {
+  return count > 0 ? `Notifications, ${String(count)} unread` : "Notifications";
+}
+
 /** A 44 pt round icon button with no resting fill — a press shows a soft circle (as the starter kit's). */
-function HeaderIconButton({ icon, accessibilityLabel, onPress, testID }: HeaderIconButtonProps): React.JSX.Element {
+function HeaderIconButton({
+  icon,
+  accessibilityLabel,
+  onPress,
+  badge,
+  testID,
+}: HeaderIconButtonProps): React.JSX.Element {
   return (
     <Pressable
       accessibilityRole="button"
@@ -341,6 +367,7 @@ function HeaderIconButton({ icon, accessibilityLabel, onPress, testID }: HeaderI
       testID={testID}
       className="size-11 items-center justify-center rounded-full active:bg-muted">
       <Icon icon={icon} size="md" colorClassName="accent-foreground" />
+      {badge}
     </Pressable>
   );
 }

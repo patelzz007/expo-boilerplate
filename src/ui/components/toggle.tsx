@@ -21,10 +21,11 @@ import { Icon, type IconSize, type LucideIcon } from "./icon";
 
 export const toggleVariants = cva("flex-row items-center justify-center gap-1.5 active:opacity-80", {
   variants: {
-    /** `default`: borderless until pressed. `outline`: always bordered. */
+    /** `default`: borderless until pressed. `outline`: always bordered. `pill`: a round chip, solid brand while pressed (a feed's filters). */
     variant: {
       default: "border border-transparent",
       outline: "border border-input",
+      pill: "border border-transparent",
     },
     /** `sm` is 36 pt tall; its touch area still reaches 44 pt. */
     size: {
@@ -43,15 +44,22 @@ export const toggleVariants = cva("flex-row items-center justify-center gap-1.5 
       error: "border-destructive",
     },
   },
+  compoundVariants: [
+    { variant: "pill", className: "rounded-full" },
+    { variant: "pill", pressed: true, className: "bg-primary" },
+    { variant: "pill", pressed: false, className: "bg-muted" },
+  ],
   defaultVariants: { variant: "default", size: "md", pressed: false, state: "default" },
 });
 
 export const toggleLabelVariants = cva("font-sans-medium", {
   variants: {
+    variant: { default: "", outline: "", pill: "" },
     size: { sm: "text-sm", md: "text-sm", lg: "text-base" },
     pressed: { true: "text-secondary-foreground", false: "text-foreground" },
   },
-  defaultVariants: { size: "md", pressed: false },
+  compoundVariants: [{ variant: "pill", pressed: true, className: "text-primary-foreground" }],
+  defaultVariants: { variant: "default", size: "md", pressed: false },
 });
 
 type ToggleVariantProps = VariantProps<typeof toggleVariants>;
@@ -59,8 +67,11 @@ export type ToggleVariant = NonNullable<ToggleVariantProps["variant"]>;
 export type ToggleSize = NonNullable<ToggleVariantProps["size"]>;
 
 /** The glyph's and spinner's colour, pressed or not (Uniwind `accent-*` → the native `color` prop). */
-export function toggleContentColorOf(pressed: boolean): string {
-  return pressed ? "accent-secondary-foreground" : "accent-foreground";
+export function toggleContentColorOf(pressed: boolean, variant: ToggleVariant = "default"): string {
+  if (!pressed) {
+    return "accent-foreground";
+  }
+  return variant === "pill" ? "accent-primary-foreground" : "accent-secondary-foreground";
 }
 
 /** The glyph's size step per toggle size. */
@@ -124,7 +135,7 @@ export const Toggle = React.memo(
       playSelectionFeedback();
       onChange(!pressed);
     }, [onChange, pressed]);
-    const contentColor = toggleContentColorOf(pressed);
+    const contentColor = toggleContentColorOf(pressed, variant);
     const showsLabel = !hideLabel || icon === undefined;
     return (
       <Pressable
@@ -145,7 +156,7 @@ export const Toggle = React.memo(
           <Icon icon={icon} size={TOGGLE_ICON_SIZE[size]} colorClassName={contentColor} />
         )}
         {showsLabel ? (
-          <Text numberOfLines={1} className={toggleLabelVariants({ size, pressed })}>
+          <Text numberOfLines={1} className={cn(toggleLabelVariants({ variant, size, pressed }))}>
             {label}
           </Text>
         ) : null}

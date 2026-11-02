@@ -27,3 +27,45 @@ export function nowEpochMs(): EpochMs {
 export function epochMs(value: number): EpochMs {
   return EpochMsSchema.parse(Math.round(value));
 }
+
+// ── Recursive data-value schema ──────────────────────────────────────────
+// Used by the response envelope so `data` is typed instead of `z.unknown()`.
+
+/** A JSON-safe primitive. */
+export type DataPrimitive = string | number | boolean | null;
+
+/**
+ * Any JSON-safe value. Object values tolerate `undefined` so optional
+ * shapes satisfy it — `undefined` properties are skipped during serialization.
+ */
+export type DataValue = DataPrimitive | readonly DataValue[] | { readonly [key: string]: DataValue | undefined };
+
+/**
+ * Base response schema for all database entity responses.
+ *
+ * Every entity response schema should extend this via `.extend()` so that
+ * `createdAt`, `updatedAt`, `isDeleted`, and `deletedAt` are consistently
+ * present across all endpoints. All timestamps are epoch milliseconds.
+ * Deliberately NOT `.strict()`: it is a RESPONSE schema (ADR 022) — the API
+ * strips unknown keys and clients must tolerate additive fields.
+ */
+export const BaseResponseSchema = z.object({
+  createdAt: EpochMsSchema.meta({
+    description: "Epoch milliseconds when the record was created",
+    example: 1786300000000,
+  }),
+  updatedAt: EpochMsSchema.meta({
+    description: "Epoch milliseconds when the record was last updated",
+    example: 1786300000000,
+  }),
+  isDeleted: z.boolean().meta({
+    description: "Soft-delete flag — false means the record is active",
+    example: false,
+  }),
+  deletedAt: EpochMsSchema.nullable().meta({
+    description: "Epoch milliseconds when soft-delete occurred, or null if active",
+    example: null,
+  }),
+});
+
+export type BaseResponse = z.output<typeof BaseResponseSchema>;

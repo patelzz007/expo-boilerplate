@@ -78,6 +78,17 @@ describe("PageHeader", () => {
     expect(onNotifications).toHaveBeenCalledTimes(1);
   });
 
+  it("puts the unread count on the bell's corner and in its name, and nothing at zero", async () => {
+    await renderHeader({ notificationCount: 3 });
+
+    expect(screen.getByRole("button", { name: "Notifications, 3 unread" })).toBeOnTheScreen();
+    expect(screen.getByText("3", { includeHiddenElements: true })).toBeOnTheScreen();
+
+    await renderHeader({ notificationCount: 0 });
+    expect(screen.getByRole("button", { name: "Notifications" })).toBeOnTheScreen();
+    expect(screen.queryByTestId("header-notification-count", { includeHiddenElements: true })).toBeNull();
+  });
+
   it("draws the controls row exactly PAGE_HEADER_ROW_HEIGHT tall, where the toasts are anchored", async () => {
     await renderHeader();
 

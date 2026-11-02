@@ -7,6 +7,7 @@
 
 import type {
   BarcodeScanningResult,
+  BarcodeType,
   CameraViewProps,
   PermissionResponse,
   ScanningOptions,
@@ -47,11 +48,28 @@ export class CameraView extends React.Component<MockCameraViewProps> {
     return { remove: jest.fn((): void => void modernScanListeners.delete(listener)) };
   });
 
+  /** Like the native camera: once mounted it reports itself ready (or, as a suite sets, never does or fails). */
+  public override componentDidMount(): void {
+    switch (cameraStart.current) {
+      case "ready":
+        this.props.onCameraReady?.();
+        return;
+      case "fails":
+        this.props.onMountError?.({ message: "Camera is not available" });
+        return;
+      case "pending":
+        return;
+    }
+  }
+
   public override render(): React.JSX.Element {
     latestCameraProps.current = this.props;
     return <View {...this.props} />;
   }
 }
+
+/** How the next camera to mount starts: `ready` (the default), `pending` (still starting) or `fails`. */
+export const cameraStart: { current: "ready" | "pending" | "fails" } = { current: "ready" };
 
 /** Delivers `data` to every Google-scanner listener, as the native event does. */
 export function emitModernScan(data: string): void {
@@ -95,3 +113,9 @@ export function permissionOf(granted: boolean, canAskAgain: boolean): Permission
 export function scannedBarcode(data: string): BarcodeScanningResult {
   return { type: "qr", data, cornerPoints: [], bounds: { origin: { x: 0, y: 0 }, size: { width: 0, height: 0 } } };
 }
+
+/** expo-camera's photo decoder; each test says what the picked photo holds. */
+export const scanFromURLAsync: jest.Mock<Promise<BarcodeScanningResult[]>, [string, BarcodeType[]?]> = jest.fn<
+  Promise<BarcodeScanningResult[]>,
+  [string, BarcodeType[]?]
+>((): Promise<BarcodeScanningResult[]> => Promise.resolve([]));

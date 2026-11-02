@@ -5,6 +5,7 @@ import type { TextInstance } from "react-native";
 import {
   DEFAULT_RELATIVE_TIME_LABELS,
   RelativeTime,
+  SHORT_RELATIVE_TIME_LABELS,
   formatAbsoluteTime,
   formatRelativeTime,
   type RelativeTimeLabels,
@@ -42,6 +43,13 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(NOW, NOW)).toBe("now");
     expect(formatRelativeTime(NOW - FIFTY_NINE * SECOND_MS, NOW)).toBe("now");
     expect(formatRelativeTime(NOW + FIFTY_NINE * SECOND_MS, NOW)).toBe("now");
+  });
+
+  it('has a feed\'s compact wording: no "ago", the unit shortened', () => {
+    expect(formatRelativeTime(NOW - THREE * MINUTE_MS, NOW, SHORT_RELATIVE_TIME_LABELS)).toBe("3m");
+    expect(formatRelativeTime(NOW - TWO * DAY_MS, NOW, SHORT_RELATIVE_TIME_LABELS)).toBe("2d");
+    expect(formatRelativeTime(NOW - FIFTY_NINE * SECOND_MS, NOW, SHORT_RELATIVE_TIME_LABELS)).toBe("Just now");
+    expect(formatRelativeTime(NOW + TWO * DAY_MS, NOW, SHORT_RELATIVE_TIME_LABELS)).toBe("in 2d");
   });
 
   it("speaks the caller's words for another language", () => {

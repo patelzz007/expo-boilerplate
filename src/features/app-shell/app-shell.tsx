@@ -1,6 +1,6 @@
 // The frame of every signed-in screen (ADR 046): the app drawer (ADR 038), the toasts confirming what
 // actions did (ADR 047) and, laid over the screens, the shared page header — menu or
-// back, notifications, and the page's title and subtitle. All of
+// back, notifications (the sample inbox behind the bell and the inbox screen), and the page's title and subtitle. All of
 // it is rendered once for the whole (app) group and never re-mounts as screens
 // change; the screens learn the header's height from PageHeaderClearance and
 // start their content below it.
@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { PAGE_HEADER_ESTIMATED_HEIGHT, pageHeaderControlsBottom } from "../../components/page-header";
 import { PageHeaderClearanceProvider } from "../../lib/page-header-clearance";
+import { SampleInboxProvider } from "../../contexts/notifications";
 import { PageHeaderScrollProvider, type PageHeaderScroll } from "../../lib/page-header-scroll";
 import { AppDrawerStoreProvider } from "../app-drawer/facade";
 import { createAppDrawerStore } from "../app-drawer/store";
@@ -53,23 +54,25 @@ export function AppShell({ children }: AppShellProps): React.JSX.Element {
   );
   return (
     <AppDrawerStoreProvider store={drawerStore}>
-      <ToastStoreProvider store={toastStore}>
-        <AppDrawer>
-          <PageHeaderClearanceProvider value={headerBottom}>
-            <PageHeaderScrollProvider value={headerScroll}>
-              <View className="flex-1">
-                {children}
-                <AppHeader
-                  scroll={headerScroll}
-                  onHeightChange={setHeaderHeight}
-                  onCollapseDistanceChange={reportCollapseDistance}
-                />
-                <ToastHost top={toastTop} />
-              </View>
-            </PageHeaderScrollProvider>
-          </PageHeaderClearanceProvider>
-        </AppDrawer>
-      </ToastStoreProvider>
+      <SampleInboxProvider>
+        <ToastStoreProvider store={toastStore}>
+          <AppDrawer>
+            <PageHeaderClearanceProvider value={headerBottom}>
+              <PageHeaderScrollProvider value={headerScroll}>
+                <View className="flex-1">
+                  {children}
+                  <AppHeader
+                    scroll={headerScroll}
+                    onHeightChange={setHeaderHeight}
+                    onCollapseDistanceChange={reportCollapseDistance}
+                  />
+                  <ToastHost top={toastTop} />
+                </View>
+              </PageHeaderScrollProvider>
+            </PageHeaderClearanceProvider>
+          </AppDrawer>
+        </ToastStoreProvider>
+      </SampleInboxProvider>
     </AppDrawerStoreProvider>
   );
 }

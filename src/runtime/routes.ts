@@ -17,6 +17,10 @@ export const ROUTES = {
   /** Read a PDF: one the person picks, or `?url=&name=` pushed by another screen (features/pdf-viewer, ADR 056). */
   pdfViewer: "/settings/pdf-viewer",
   qrScanner: "/settings/qr-scanner",
+  /** The inbox, opened from the header's bell (sample notices on this phone). */
+  notifications: "/settings/notifications",
+  /** What reaches the person, and where (saved on this phone). */
+  notificationSettings: "/settings/notification-settings",
   /** The UI kit's live gallery (src/ui), opened from the drawer's Developer section. */
   components: "/settings/components",
 } satisfies Record<string, `/${string}`>;

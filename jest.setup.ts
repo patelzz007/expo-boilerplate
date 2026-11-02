@@ -18,6 +18,7 @@ import * as mockBlur from "./test/expo-blur-mock";
 import * as mockCrypto from "./test/expo-crypto-mock";
 import * as mockDocumentPicker from "./test/expo-document-picker-fake";
 import * as mockFileSystem from "./test/expo-file-system-fake";
+import * as mockImagePicker from "./test/expo-image-picker-fake";
 import * as mockSharing from "./test/expo-sharing-fake";
 import { disposeTrackedQueryClients } from "./test/query-clients";
 import { memorySecureStore as mockSecureStore } from "./test/secure-store-memory";
@@ -29,6 +30,8 @@ jest.mock("expo-blur", () => mockBlur);
 jest.mock("expo-crypto", () => mockCrypto);
 jest.mock("expo-file-system", () => mockFileSystem);
 jest.mock("expo-document-picker", () => mockDocumentPicker);
+// The photo library is the OS's (test/expo-image-picker-fake.ts): "Scan from gallery" picks from it.
+jest.mock("expo-image-picker", () => mockImagePicker);
 jest.mock("expo-sharing", () => mockSharing);
 jest.mock("react-native-keyboard-controller", () =>
   jest.requireActual<typeof KeyboardController>("react-native-keyboard-controller/jest")
@@ -39,6 +42,7 @@ beforeEach(() => {
   mockSecureStore.reset();
   mockFileSystem.reset();
   mockDocumentPicker.reset();
+  mockImagePicker.reset();
   mockSharing.reset();
 });
 

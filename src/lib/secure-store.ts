@@ -9,6 +9,7 @@
 // through the schema; a corrupt or unexpected value is treated as absent and
 // removed (or overwritten with the default), never cast.
 
+import { NotificationCategorySchema, NotificationChannelSchema, NotificationDigestFrequencySchema } from "@/shared";
 import * as SecureStore from "expo-secure-store";
 import { z } from "zod";
 
@@ -16,6 +17,43 @@ import { z } from "zod";
 export const ThemePreferenceSchema = z.enum(["system", "light", "dark", "nord"]);
 
 export type ThemePreference = z.output<typeof ThemePreferenceSchema>;
+
+/** One switch of the notification settings the person changed (contexts/notifications). */
+const NotificationSwitchChoiceSchema = z
+  .object({ category: NotificationCategorySchema, channel: NotificationChannelSchema, enabled: z.boolean() })
+  .strict();
+
+/** At most one changed switch per category × channel. */
+const MAX_NOTIFICATION_SWITCH_CHOICES =
+  NotificationCategorySchema.options.length * NotificationChannelSchema.options.length;
+
+/** More stores than the sample list holds, so a stored list is never cut short. */
+const MAX_NOTIFICATION_STORES = 20;
+
+/**
+ * The notification settings as the person left them (contexts/notifications): only what they chose —
+ * the switches they changed, quiet hours, the digest and offers — never the whole matrix, so the entry
+ * stays small and a new switch in a later version starts at its default.
+ */
+export const NotificationSettingsChoicesSchema = z
+  .object({
+    switches: z.array(NotificationSwitchChoiceSchema).max(MAX_NOTIFICATION_SWITCH_CHOICES),
+    quietHoursEnabled: z.boolean(),
+    digestFrequency: NotificationDigestFrequencySchema,
+    platformMarketingConsent: z.boolean(),
+    /** Stores whose offers are on. */
+    storesWithOffers: z.array(z.string().min(1)).max(MAX_NOTIFICATION_STORES),
+    /** Stores the person left. */
+    storesLeft: z.array(z.string().min(1)).max(MAX_NOTIFICATION_STORES),
+  })
+  .strict();
+
+export type NotificationSettingsChoices = z.output<typeof NotificationSettingsChoicesSchema>;
+
+/** JSON as stored: any value a registry schema can describe. */
+const StoredJsonSchema = z.json();
+
+type StoredJson = z.output<typeof StoredJsonSchema>;
 
 /** One declared Secure Store entry: its key and the schema its value must match. */
 export interface SecureStoreEntry<TValue> {
@@ -27,10 +65,8 @@ export interface SecureStoreEntry<TValue> {
 export const SECURE_STORE_ENTRIES = {
   theme: { key: "prefs.theme", schema: ThemePreferenceSchema },
   onboardingCompleted: { key: "prefs.onboarding.completed", schema: z.boolean() },
-} satisfies Record<string, SecureStoreEntry<string | number | boolean>>;
-
-/** JSON as stored: any value a registry schema can describe. */
-const StoredJsonSchema = z.union([z.string(), z.number(), z.boolean()]);
+  notificationSettings: { key: "prefs.notifications", schema: NotificationSettingsChoicesSchema },
+} satisfies Record<string, SecureStoreEntry<StoredJson>>;
 
 /** Secure Store could not be read or written (keychain unavailable, device locked during a background read, …). */
 export class SecureStoreUnavailableError extends Error {

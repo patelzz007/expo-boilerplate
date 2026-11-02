@@ -5,7 +5,7 @@
 // "required" rule in a demo stands in for a form's zod schema: the kit never
 // validates.
 
-import BoldIcon from "lucide-react-native/icons/bold";
+import BoldIcon from "lucide-react-native/icons/letter-b";
 import ItalicIcon from "lucide-react-native/icons/italic";
 import TextAlignCenterIcon from "lucide-react-native/icons/text-align-center";
 import TextAlignEndIcon from "lucide-react-native/icons/text-align-end";
@@ -25,6 +25,7 @@ import { Switch } from "@/ui/components/switch";
 import { MutedText } from "@/ui/components/text";
 import { Toggle } from "@/ui/components/toggle";
 import { ToggleGroup, type ToggleGroupOption } from "@/ui/components/toggle-group";
+import { TreeBranch } from "@/ui/components/tree-branch";
 import { DemoBlock } from "../demo-block";
 
 // --- Demo data --------------------------------------------------------------
@@ -153,6 +154,35 @@ function CheckboxDemo(): React.JSX.Element {
       />
       <Checkbox label="Saving…" checked={newsletter} onChange={setNewsletter} loading />
       <Checkbox label="Managed by your tenant" checked onChange={setNewsletter} disabled />
+      <Checkbox label="Always on" description="Kept on by a policy" checked locked onChange={setNewsletter} />
+    </DemoBlock>
+  );
+}
+
+function TreeBranchDemo(): React.JSX.Element {
+  const [email, setEmail] = React.useState(true);
+  const [phone, setPhone] = React.useState(false);
+  const allOn = email && phone;
+  const handleAll = React.useCallback((checked: boolean): void => {
+    setEmail(checked);
+    setPhone(checked);
+  }, []);
+  return (
+    <DemoBlock
+      title="TreeBranch"
+      description="Children hung under their parent on a guide line; the parent checks all of them, some or none.">
+      <Checkbox
+        label="Order updates"
+        description="Everything about your orders"
+        checked={allOn}
+        indeterminate={email !== phone}
+        onChange={handleAll}
+      />
+      <TreeBranch accessibilityLabel="Order updates" className="ml-3">
+        <Checkbox label="In app" description="Always on" size="sm" checked locked onChange={setEmail} />
+        <Checkbox label="Email" size="sm" checked={email} onChange={setEmail} />
+        <Checkbox label="Phone" size="sm" checked={phone} onChange={setPhone} />
+      </TreeBranch>
     </DemoBlock>
   );
 }
@@ -271,7 +301,9 @@ function SwitchDemo(): React.JSX.Element {
   const [location, setLocation] = React.useState(false);
   const [consent, setConsent] = React.useState(false);
   return (
-    <DemoBlock title="Switch" description="An on / off setting that applies at once.">
+    <DemoBlock
+      title="Switch"
+      description="An on / off setting that applies at once. On, off, unavailable and always on each look different.">
       <Switch label="Notifications" checked={notifications} onChange={setNotifications} />
       <Switch
         label="Share location"
@@ -289,7 +321,14 @@ function SwitchDemo(): React.JSX.Element {
         invalid={!consent}
       />
       <Switch label="Saving…" checked={notifications} onChange={setNotifications} loading />
-      <Switch label="Managed by your tenant" checked onChange={setNotifications} disabled />
+      <Switch
+        label="Phone notifications"
+        description="Unavailable: turn on notifications first"
+        checked={false}
+        onChange={setNotifications}
+        disabled
+      />
+      <Switch label="Security alerts" description="Always on" checked onChange={setNotifications} locked />
     </DemoBlock>
   );
 }
@@ -448,6 +487,7 @@ export function SelectionDemos(): React.JSX.Element {
   return (
     <View className="gap-4">
       <CheckboxDemo />
+      <TreeBranchDemo />
       <RadioGroupDemo />
       <SegmentedControlDemo />
       <SelectFieldDemo />

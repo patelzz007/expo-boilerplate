@@ -4,6 +4,7 @@
 // with back. The header collapses with the page's scrolling (src/lib/page-header-scroll.tsx) into a
 // slim bar that keeps the menu, the title and notifications. The app draws edge to edge and the header
 // is the page's colour, so the status bar's icons follow the theme: dark on a light page, light on a dark one.
+// The bell carries the unread count of the sample inbox (contexts/notifications).
 
 import { usePathname, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -14,12 +15,13 @@ import { useUniwind } from "uniwind";
 import { isDarkTheme } from "@/tokens";
 
 import { PageHeader } from "../../components/page-header";
+import { useUnreadNotifications } from "../../contexts/notifications";
 import { usePageHeaderProgress, type PageHeaderScroll } from "../../lib/page-header-scroll";
+import { ROUTES } from "../../runtime/routes";
 import { useAppDrawerCommands } from "../app-drawer/facade";
 import { screenHeadingOf } from "../navigation/app-screens";
 import { isTabRoot } from "../navigation/drawer-destinations";
 import { headerTitleDriftOf } from "../navigation/header-transition";
-import { useToast } from "../toast/facade";
 
 interface PathChange {
   readonly path: string;
@@ -27,7 +29,6 @@ interface PathChange {
 }
 
 const NO_DRIFT = 0;
-const NOTIFICATIONS_PLACEHOLDER = "Notifications are coming soon.";
 
 export interface AppHeaderProps {
   /** The header's scroll link, owned by the shell. */
@@ -42,7 +43,6 @@ export function AppHeader({ scroll, onHeightChange, onCollapseDistanceChange }: 
   const pathname = usePathname();
   const router = useRouter();
   const drawer = useAppDrawerCommands();
-  const toast = useToast();
   const insets = useSafeAreaInsets();
   const { theme } = useUniwind();
   const [change, setChange] = React.useState<PathChange>({ path: pathname, drift: NO_DRIFT });
@@ -54,8 +54,9 @@ export function AppHeader({ scroll, onHeightChange, onCollapseDistanceChange }: 
     router.back();
   }, [router]);
   const openNotifications = React.useCallback((): void => {
-    toast.info(NOTIFICATIONS_PLACEHOLDER);
-  }, [toast]);
+    router.push(ROUTES.notifications);
+  }, [router]);
+  const unreadNotifications = useUnreadNotifications();
   const heading = screenHeadingOf(pathname);
 
   const progress = usePageHeaderProgress(scroll);
@@ -72,6 +73,7 @@ export function AppHeader({ scroll, onHeightChange, onCollapseDistanceChange }: 
         onMenu={drawer.opened}
         onBack={goBack}
         onNotifications={openNotifications}
+        notificationCount={unreadNotifications}
         topInset={insets.top}
         progress={progress}
         collapseDistance={scroll.collapseDistance}

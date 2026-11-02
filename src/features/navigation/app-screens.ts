@@ -3,6 +3,7 @@
 // resolves both from the path the moment it changes, so the new title moves in step with the page
 // instead of a frame after it.
 
+import { NOTIFICATION_SETTINGS_TITLE, NOTIFICATIONS_TITLE } from "../../contexts/notifications";
 import { ROUTES, TEAM_MEMBER_PATH, type AppRoute } from "../../runtime/routes";
 import { PDF_VIEWER_TITLE } from "../pdf-viewer/labels";
 import { QR_SCANNER_TITLE } from "../qr-scanner/labels";
@@ -30,6 +31,8 @@ const SUB_SCREEN_HEADINGS: readonly (readonly [AppRoute, ScreenHeading])[] = [
   [ROUTES.appearance, { title: SCREEN_TITLES.appearance, subtitle: "Choose how the app looks" }],
   [ROUTES.pdfViewer, { title: PDF_VIEWER_TITLE, subtitle: "Open and read PDF documents" }],
   [ROUTES.qrScanner, { title: QR_SCANNER_TITLE, subtitle: "Scan a code with your camera" }],
+  [ROUTES.notifications, { title: NOTIFICATIONS_TITLE, subtitle: "Everything we've told you" }],
+  [ROUTES.notificationSettings, { title: NOTIFICATION_SETTINGS_TITLE, subtitle: "What reaches you, and where" }],
   [ROUTES.components, { title: SCREEN_TITLES.components, subtitle: "The UI kit, live" }],
 ];
 
